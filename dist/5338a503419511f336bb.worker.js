@@ -42,9 +42,6 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/*!*******************************************************************************!*\
-  !*** ./~/babel-loader/lib!./src/layouts/ltrTreeLayout/ltrTreeLayoutWorker.js ***!
-  \*******************************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -68,7 +65,7 @@
 	 */
 	/* eslint-env worker */
 	/* eslint no-restricted-syntax: 0 */
-	var LTRTreeLayouter = __webpack_require__(/*! ./ltrTreeLayouter.js */ 1);
+	var LTRTreeLayouter = __webpack_require__(1);
 	
 	self.ltrTreeLayouter = new LTRTreeLayouter();
 	
@@ -97,22 +94,19 @@
 
 /***/ }),
 /* 1 */
-/*!******************************************************!*\
-  !*** ./src/layouts/ltrTreeLayout/ltrTreeLayouter.js ***!
-  \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _ltrTreeGraph = __webpack_require__(/*! ./ltrTreeGraph */ 2);
+	var _ltrTreeGraph = __webpack_require__(2);
 	
 	var _ltrTreeGraph2 = _interopRequireDefault(_ltrTreeGraph);
 	
-	var _acyclicFAS = __webpack_require__(/*! ./acyclicFAS */ 5);
+	var _acyclicFAS = __webpack_require__(5);
 	
 	var _acyclicFAS2 = _interopRequireDefault(_acyclicFAS);
 	
-	var _ranker = __webpack_require__(/*! ./ranker */ 6);
+	var _ranker = __webpack_require__(6);
 	
 	var _ranker2 = _interopRequireDefault(_ranker);
 	
@@ -287,14 +281,11 @@
 
 /***/ }),
 /* 2 */
-/*!***************************************************!*\
-  !*** ./src/layouts/ltrTreeLayout/ltrTreeGraph.js ***!
-  \***************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _lodash = __webpack_require__(/*! lodash */ 3);
+	var _lodash = __webpack_require__(3);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
@@ -483,9 +474,6 @@
 
 /***/ }),
 /* 3 */
-/*!****************************!*\
-  !*** ./~/lodash/lodash.js ***!
-  \****************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -17573,13 +17561,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../webpack/buildin/module.js */ 4)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(4)(module)))
 
 /***/ }),
 /* 4 */
-/*!***********************************!*\
-  !*** (webpack)/buildin/module.js ***!
-  \***********************************/
 /***/ (function(module, exports) {
 
 	module.exports = function(module) {
@@ -17596,14 +17581,11 @@
 
 /***/ }),
 /* 5 */
-/*!*************************************************!*\
-  !*** ./src/layouts/ltrTreeLayout/acyclicFAS.js ***!
-  \*************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _lodash = __webpack_require__(/*! lodash */ 3);
+	var _lodash = __webpack_require__(3);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
@@ -17673,14 +17655,11 @@
 
 /***/ }),
 /* 6 */
-/*!*********************************************!*\
-  !*** ./src/layouts/ltrTreeLayout/ranker.js ***!
-  \*********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _lodash = __webpack_require__(/*! lodash */ 3);
+	var _lodash = __webpack_require__(3);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
