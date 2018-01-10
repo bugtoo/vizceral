@@ -15,7 +15,8 @@
     "build:js": "webpack --bail && webpack --bail -p",
     "watch": "webpack --watch -d",
     "release": "release",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",
