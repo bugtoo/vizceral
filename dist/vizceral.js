@@ -1196,6 +1196,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _interopRequireDefault(_trafficGraphView).default;
 	  }
 	});
+	
+	var _ShapesFactory = __webpack_require__(21);
+	
+	Object.defineProperty(exports, 'ShapesFactory', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_ShapesFactory).default;
+	  }
+	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
