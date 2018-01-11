@@ -1205,6 +1205,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _interopRequireDefault(_ShapesFactory).default;
 	  }
 	});
+	
+	var _ShapeParent = __webpack_require__(24);
+	
+	Object.defineProperty(exports, 'ShapeParent', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_ShapeParent).default;
+	  }
+	});
+	
+	var _ShapesUtils = __webpack_require__(26);
+	
+	Object.defineProperty(exports, 'ShapesUtils', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_ShapesUtils).default;
+	  }
+	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
