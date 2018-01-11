@@ -11,3 +11,4 @@ export { default as NodeView } from './nodeView';
 export { default as NodeViewStandard } from './nodeViewStandard';
 export { default as TrafficGraph } from './trafficGraph';
 export { default as TrafficGraphView } from './trafficGraphView';
+export { default as ShapesFactory } from './ShapesFactory';
