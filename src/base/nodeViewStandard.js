@@ -37,7 +37,7 @@ class NodeViewStandard extends NodeView {
     shape.scale(this.radius / defaultRadius);
 
     this.meshes.innerCircle = this.addChildElement(shape.innergeometry, shape.material);
-    this.meshes.outerBorder = this.addChildElement(shape.outerborder, shape.bordermaterial);
+    // this.meshes.outerBorder = this.addChildElement(shape.outerborder, shape.bordermaterial);
 
     this.meshes.noticeDot = this.addChildElement(NodeView.getNoticeDotGeometry(this.radius), this.dotMaterial);
     this.refreshNotices();

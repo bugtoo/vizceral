@@ -85,7 +85,7 @@ function normalDistribution () {
   return (((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3) + 0.5;
 }
 
-function generateParticleSystem (size, customWidth, connectionWidth, connectionDepth) {
+function generateParticleSystem (size, customWidth, connectionWidth, connectionDepth, normalY) {
   const vertices = new Float32Array(size * 3);
   const customColors = new Float32Array(size * 3);
   const customOpacities = new Float32Array(size);
@@ -93,12 +93,13 @@ function generateParticleSystem (size, customWidth, connectionWidth, connectionD
   const velocities = new Float32Array(size * 3); // Don't want to to be doing math in the update loop
 
   for (let i = 0; i < size; i++) {
-      // Position
+    // Position
     vertices[i * 3] = 0;
     vertices[(i * 3) + 1] = customWidth ? connectionWidth - (normalDistribution() * connectionWidth * 2) : 1;
     vertices[(i * 3) + 2] = customWidth ? connectionDepth - (normalDistribution() * connectionDepth * 2) : -2;
+    // normalY[i] = vertices[(i * 3) + 1];
 
-      // Custom colors
+    // Custom colors
     customColors[i] = GlobalStyles.rgba.colorTraffic.normal.r;
     customColors[i + 1] = GlobalStyles.rgba.colorTraffic.normal.g;
     customColors[i + 2] = GlobalStyles.rgba.colorTraffic.normal.b;
@@ -199,6 +200,7 @@ class ConnectionView extends BaseView {
     super(connection);
     this.setParticleLevels();
     this.maxParticles = maxParticles;
+    this.magnitude = 0;
 
     this.dimmedLevel = 0.05;
 
@@ -223,8 +225,10 @@ class ConnectionView extends BaseView {
 
     this.lastParticleIndex = this.particleSystemSize - 1;
     this.freeIndexes = [];
+    this.yIndexes = [];
+    this.normalY = [];
 
-    const ps = generateParticleSystem(this.particleSystemSize, this.customWidth, this.connectionWidth, this.connectionDepth);
+    const ps = generateParticleSystem(this.particleSystemSize, this.customWidth, this.connectionWidth, this.connectionDepth, this.normalY);
     for (let i = 0; i < this.particleSystemSize; i++) {
       this.freeIndexes[i] = i;
     }
@@ -459,22 +463,56 @@ class ConnectionView extends BaseView {
 
     // Update the position of all particles in flight
     for (i = 0, j = 0; i < this.positionAttr.array.length; i += 3, j += 1) {
+      if(!this.curveY) {
+        this.curveY = [];
+      }
       vx = this.positionAttr.array[i];
+      if (!this.yIndexes[j]) {
+        this.yIndexes[j] = this.positionAttr.array[i + 1];
+      }
 
       if (vx !== 0) {
         vx += this.velocity[i];
         if (vx >= this.length) {
           this.freeParticleIndex(j);
+          this.yIndexes[j] = 0;
+          this.curveY[j] = null;
           vx = 0;
         }
       }
+
+
+      // const magn = 300;
+      const reso = 1000;
       this.positionAttr.array[i] = vx;
+      if (this.magnitude !== 0) {
+        // this.setParticleColor(j, {r: 255, g: 0, b: 0});
+        const middle = this.length / 2;
+        const ratio = vx / this.length;
+        if(!this.curveY[j]) {
+          const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(middle, this.magnitude * 2, 0), new THREE.Vector3(this.length, 0, 0));
+          const points = curve.getPoints(reso);
+          this.curveY[j] = points;
+        }
+        if (this.yIndexes[j] + this.curveY[j][Math.floor(ratio * reso)]) {
+          this.positionAttr.array[i + 1] = this.yIndexes[j] + this.curveY[j][Math.floor(ratio * reso)].y;
+        }
+      }
+      // if (vx < middle) {
+      // }
+      // else {
+      //   this.positionAttr.array[i + 1] = this.yIndexes[j] + points[Math.floor((2 - ratio) * 100)];
+      // }
     }
     this.positionAttr.needsUpdate = true;
   }
 
   refresh () {
     this.validateNotices();
+  }
+
+  setMagnitude (value) {
+    this.magnitude = value;
   }
 
   setParticleColor (index, color) {

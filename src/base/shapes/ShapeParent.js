@@ -33,7 +33,7 @@ class ShapeParent {
     return this.customNode;
   }
 
-  scale(factor) {
+  scale (factor) {
     const scaleParams = new Array(3).fill(factor);
     this.innergeometry = this.innergeometry.scale(...scaleParams);
     this.outerborder = this.outerborder.scale(...scaleParams);

@@ -13,11 +13,31 @@
  *     limitations under the License.
  *
  */
+import * as THREE from 'three';
+import threeSimplicialComplex from 'three-simplicial-complex';
+import svgMesh3d from 'svg-mesh-3d';
+import ShapeParent from './shapes/ShapeParent';
+
+const createGeometry = threeSimplicialComplex(THREE);
+
 const ShapesFactory = {};
 ShapesFactory.shapes = [];
 ShapesFactory.registerShape = function (shapeName, shapeClass) {
   if (ShapesFactory.shapes[shapeName] === undefined) {
     ShapesFactory.shapes[shapeName] = shapeClass;
+  }
+};
+
+ShapesFactory.registerSVG = function (shapeName, svg) {
+  class ShapeSVG extends ShapeParent {
+    _createInnerGeometry () {
+      const meshData = svgMesh3d(svg);
+      return createGeometry(meshData);
+    }
+  }
+
+  if (ShapesFactory.shapes[shapeName] === undefined) {
+    ShapesFactory.shapes[shapeName] = ShapeSVG;
   }
 };
 
