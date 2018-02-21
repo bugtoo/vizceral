@@ -18,40 +18,40 @@ import GlobalStyles from '../../globalStyles';
 
 class ShapeParent {
   constructor (node) {
-    this.customNode = {};
-    this.customNode.innergeometry = this._createInnerGeometry(16, 32);
-    this.customNode.outerborder = this._createOuterBorder(10, 32);
+      this.customNode = {};
+      this.customNode.innergeometry = this._createInnerGeometry(16, 32);
+      this.customNode.outerborder = this._createOuterBorder(10, 32);
 
-    if (node.nodeStatus && GlobalStyles.styles.colorNodeStatus[node.nodeStatus]) {
-      this.customNode.material = this._createMaterial(GlobalStyles.styles.colorNodeStatus[node.nodeStatus]);
-    } else {
-      this.customNode.material = this._createMaterial(GlobalStyles.styles.colorNodeStatus.default);
+      if (node.nodeStatus && GlobalStyles.styles.colorNodeStatus[node.nodeStatus]) {
+          this.customNode.material = this._createMaterial(GlobalStyles.styles.colorNodeStatus[node.nodeStatus]);
+        } else {
+          this.customNode.material = this._createMaterial(GlobalStyles.styles.colorNodeStatus.default);
+        }
+
+      this.customNode.bordermaterial = this._createMaterial(GlobalStyles.styles.colorShapeBorder);
+      this.customNode.scale = this.scale;
+      return this.customNode;
     }
 
-    this.customNode.bordermaterial = this._createMaterial(GlobalStyles.styles.colorShapeBorder);
-    this.customNode.scale = this.scale;
-    return this.customNode;
-  }
-
   scale (factor) {
-    const scaleParams = new Array(3).fill(factor);
-    this.innergeometry = this.innergeometry.scale(...scaleParams);
-    this.outerborder = this.outerborder.scale(...scaleParams);
-  }
+      const scaleParams = new Array(3).fill(factor);
+      this.innergeometry = this.innergeometry.scale(...scaleParams);
+      this.outerborder = this.outerborder.scale(...scaleParams);
+    }
 
   _createOuterBorder (radius, curveSegments) {
-    const border = new THREE.Shape();
-    border.absarc(0, 0, radius * 3.2, 0, Math.PI * 2, false);
-    const hole = new THREE.Shape();
-    hole.absarc(0, 0, radius * 3, 0, Math.PI * 2, false);
-    border.holes.push(hole);
+      const border = new THREE.Shape();
+      border.absarc(0, 0, radius * 3.2, 0, Math.PI * 2, false);
+      const hole = new THREE.Shape();
+      hole.absarc(0, 0, radius * 3, 0, Math.PI * 2, false);
+      border.holes.push(hole);
 
-    return new THREE.ShapeGeometry(border, curveSegments);
-  }
+      return new THREE.ShapeGeometry(border, curveSegments);
+    }
 
   _createMaterial (rgb) {
-    return new THREE.MeshBasicMaterial({ color: rgb });
-  }
+      return new THREE.MeshBasicMaterial({ color: rgb, side: THREE.DoubleSide });
+    }
 
 }
 
