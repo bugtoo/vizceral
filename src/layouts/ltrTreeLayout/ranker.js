@@ -15,7 +15,9 @@
  *     limitations under the License.
  *
  */
-import _ from 'lodash';
+import {
+  each, has, map, min
+} from 'lodash';
 
 const minimumLength = 1;
 
@@ -25,10 +27,10 @@ function longestPathRanking (graph) {
   function dfs (nodeName) {
     const node = graph.getNode(nodeName);
     if (!node) { return undefined; }
-    if (!_.has(visited, nodeName)) {
+    if (!has(visited, nodeName)) {
       visited[nodeName] = true;
 
-      let rank = _.min(_.map(graph.outgoingEdges(nodeName), edge => dfs(edge.target) - minimumLength));
+      let rank = min(map(graph.outgoingEdges(nodeName), edge => dfs(edge.target) - minimumLength));
       if (rank === undefined) {
         rank = 0;
       }
@@ -37,7 +39,7 @@ function longestPathRanking (graph) {
     return node.rank;
   }
 
-  _.each(graph.entryNodes(), dfs);
+  each(graph.entryNodes(), dfs);
 }
 
 function normalizeRanks (graph) {
@@ -56,10 +58,8 @@ function normalizeRanks (graph) {
 
 function forcePrimaryRankPromotions (graph, entryNodeName = 'INTERNET') {
   let entryNodes = graph.entryNodes();
-  if (entryNodeName) {
-    if (entryNodes.includes(entryNodeName)) {
-      entryNodes = [entryNodeName];
-    }
+  if (entryNodes.includes(entryNodeName)) {
+    entryNodes = [entryNodeName];
   }
   for (let i = 0; i < entryNodes.length; i++) {
     const entryNode = graph.getNode(entryNodes[i]);
@@ -69,16 +69,18 @@ function forcePrimaryRankPromotions (graph, entryNodeName = 'INTERNET') {
 
 function forceSecondaryRankPromotions (graph, entryNodeName = 'INTERNET') {
   let entryNodes = graph.entryNodes();
-  if (entryNodeName) {
-    if (entryNodes.includes(entryNodeName)) {
-      entryNodes = [entryNodeName];
-    }
+  if (entryNodes.includes(entryNodeName)) {
+    entryNodes = [entryNodeName];
   }
   for (let i = 0; i < entryNodes.length; i++) {
     const outgoingNodes = graph.outgoingNodes(entryNodes[i]);
     for (let j = 0; j < outgoingNodes.length; j++) {
       const node = graph.getNode(outgoingNodes[j]);
-      node.rank = 1;
+      if (graph.incomingNodes(node.name).length === 1) {
+        node.rank = 1;
+      } else {
+        node.rank = 2;
+      }
     }
   }
 }

@@ -26,7 +26,7 @@ import Constants from './constants';
 const loader = new THREE.TextureLoader();
 
 // Preload the particle texture
-const particle = require('url!./particleD.png'); // eslint-disable-line import/no-extraneous-dependencies
+const particle = require('url-loader!./particleD.png'); // eslint-disable-line import/no-extraneous-dependencies
 
 let particleTexture;
 loader.load(particle, (texture) => { particleTexture = texture; });
@@ -93,12 +93,12 @@ function generateParticleSystem (size, customWidth, connectionWidth, connectionD
   const velocities = new Float32Array(size * 3); // Don't want to to be doing math in the update loop
 
   for (let i = 0; i < size; i++) {
-      // Position
+    // Position
     vertices[i * 3] = 0;
     vertices[(i * 3) + 1] = customWidth ? connectionWidth - (normalDistribution() * connectionWidth * 2) : 1;
     vertices[(i * 3) + 2] = customWidth ? connectionDepth - (normalDistribution() * connectionDepth * 2) : -2;
 
-      // Custom colors
+    // Custom colors
     customColors[i] = GlobalStyles.rgba.colorTraffic.normal.r;
     customColors[i + 1] = GlobalStyles.rgba.colorTraffic.normal.g;
     customColors[i + 2] = GlobalStyles.rgba.colorTraffic.normal.b;

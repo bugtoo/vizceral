@@ -16,7 +16,9 @@
  *
  */
 /* global __HIDE_DATA__ */
-import _ from 'lodash';
+import {
+  each, filter, get, map, sum
+} from 'lodash';
 import * as THREE from 'three';
 import numeral from 'numeral';
 
@@ -47,6 +49,8 @@ const zAxis = new THREE.Vector3(0, 0, 1);
 class FocusedNodeView extends NodeView {
   constructor (service) {
     super(service);
+
+    this.surfaceDepth = 10;
 
     this.borderColor = GlobalStyles.rgba.colorPageBackground;
     this.borderColorThree = new THREE.Color(this.borderColor.r, this.borderColor.g, this.borderColor.b);
@@ -155,7 +159,7 @@ class FocusedNodeView extends NodeView {
       if (topData) {
         textContext.fillStyle = GlobalStyles.styles.colorTraffic.normal;
         textContext.font = `${metricWeight} ${this.metricFontSize}px 'Source Sans Pro', sans-serif`;
-        const topMetricDisplayValue = generateDisplayValue(_.get(this.object, topData.data), topData.format);
+        const topMetricDisplayValue = generateDisplayValue(get(this.object, topData.data), topData.format);
         textContext.fillText(topMetricDisplayValue, this.textCanvas.width / 2, top);
       }
       top += (this.metricFontSize / 2);
@@ -174,7 +178,7 @@ class FocusedNodeView extends NodeView {
       if (bottomData) {
         textContext.fillStyle = GlobalStyles.getColorTraffic(this.object.getClass());
         textContext.font = `${metricWeight} ${this.metricFontSize}px 'Source Sans Pro', sans-serif`;
-        const bottomMetricDisplayValue = generateDisplayValue(_.get(this.object, bottomData.data), bottomData.format);
+        const bottomMetricDisplayValue = generateDisplayValue(get(this.object, bottomData.data), bottomData.format);
         textContext.fillText(bottomMetricDisplayValue, this.textCanvas.width / 2, top);
       }
       top += (this.metricFontSize / 2);
@@ -208,9 +212,11 @@ class FocusedNodeView extends NodeView {
   addDonutSlice (startAngle, percent, color) {
     const size = Math.PI * 2 * percent;
     const slice = new THREE.RingGeometry(this.innerRadius, this.radius, 30, 8, startAngle, size);
-    const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color.r, color.g, color.b), side: THREE.DoubleSide, transparent: true, opacity: color.a });
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(color.r, color.g, color.b), side: THREE.DoubleSide, transparent: true, opacity: color.a
+    });
     const mesh = new THREE.Mesh(slice, mat);
-    mesh.position.set(0, 0, this.depth + 2);
+    mesh.position.set(0, 0, this.surfaceDepth + 2);
     mesh.rotation.y = Math.PI;
     mesh.userData.defaultOpacity = color.a;
 
@@ -225,7 +231,7 @@ class FocusedNodeView extends NodeView {
    * represents a new set of data
    */
   updateDonutGraph () {
-    const entryConnections = _.filter(this.object.incomingConnections, c => c.source.isEntryNode());
+    const entryConnections = filter(this.object.incomingConnections, c => c.source.isEntryNode());
     /**
      * Get the start angle of the donut graph based on the totalPercent of the donut to be filled
      *
@@ -248,27 +254,27 @@ class FocusedNodeView extends NodeView {
 
     if (this.loaded) {
       // Remove the old donut segments
-      _.each(this.donutGraphSegments, segment => this.container.remove(segment));
+      each(this.donutGraphSegments, segment => this.container.remove(segment));
       this.donutGraphSegments.length = 0;
 
-      const donutData = _.get(this.object, this.detailed.donut.data, undefined);
-      const donutIndices = _.get(this.detailed, ['donut', 'indices'], undefined);
+      const donutData = get(this.object, this.detailed.donut.data, undefined);
+      const donutIndices = get(this.detailed, ['donut', 'indices'], undefined);
       if (donutIndices) {
-        const totalPercent = _.sum(_.map(donutIndices, i => donutData[i.key] || 0));
+        const totalPercent = sum(map(donutIndices, i => donutData[i.key] || 0));
         let startAngle = getStartAngle(totalPercent);
         // add donut slices
-        _.each(donutIndices, (index) => {
+        each(donutIndices, (index) => {
           if (donutData[index.key] !== undefined) {
             const colorKey = index.class || index.key;
             startAngle = this.addDonutSlice(startAngle, donutData[index.key], GlobalStyles.getColorTrafficRGBA(colorKey));
           }
         });
       } else {
-        const totalPercent = _.sum(_.map(donutData));
+        const totalPercent = sum(map(donutData));
         let startAngle = getStartAngle(totalPercent);
         // add donut slices
-        _.each(donutData, (classPercent, key) => {
-          const colorKey = _.get(this.detailed, ['donut', 'classes', key], key);
+        each(donutData, (classPercent, key) => {
+          const colorKey = get(this.detailed, ['donut', 'classes', key], key);
           startAngle = this.addDonutSlice(startAngle, classPercent, GlobalStyles.getColorTrafficRGBA(colorKey));
         });
       }
@@ -286,9 +292,11 @@ class FocusedNodeView extends NodeView {
   addArcSlice (startAngle, percent, color, permanent) {
     const size = Math.PI * percent;
     const slice = new THREE.RingGeometry(this.innerRadius - arcMeterWidth, this.innerRadius - 1, 30, 8, startAngle, size);
-    const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color.r, color.g, color.b), side: THREE.DoubleSide, transparent: true, opacity: color.a });
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(color.r, color.g, color.b), side: THREE.DoubleSide, transparent: true, opacity: color.a
+    });
     const mesh = new THREE.Mesh(slice, mat);
-    mesh.position.set(0, 0, this.depth + 5);
+    mesh.position.set(0, 0, this.surfaceDepth + 5);
     mesh.rotation.y = Math.PI;
     mesh.userData.context = 'arc';
     mesh.userData.defaultOpacity = color.a;
@@ -304,13 +312,13 @@ class FocusedNodeView extends NodeView {
 
     if (this.loaded) {
       // remove the old arc segments
-      _.each(this.arcMeterSegments, segment => this.container.remove(segment));
+      each(this.arcMeterSegments, segment => this.container.remove(segment));
       this.arcMeterSegments.length = 0;
 
-      const arcData = _.get(this.object, this.detailed.arc.data, undefined);
+      const arcData = get(this.object, this.detailed.arc.data, undefined);
       if (arcData) {
         // arc slices
-        _.each(arcData.values, (value) => {
+        each(arcData.values, (value) => {
           const percent = value.value / arcData.total;
           const colorKey = value.class || value.name;
           const { angle } = this.addArcSlice(startAngle, percent, GlobalStyles.getColorTrafficRGBA(colorKey), false);
@@ -318,7 +326,7 @@ class FocusedNodeView extends NodeView {
         });
 
         // mark
-        let line = _.get(arcData, this.detailed.arc.lineIndex, undefined);
+        let line = get(arcData, this.detailed.arc.lineIndex, undefined);
         if (line) {
           let lineColor = GlobalStyles.rgba.colorDonutInternalColor;
           // figure out color of line
@@ -343,10 +351,12 @@ class FocusedNodeView extends NodeView {
           const triangleGeometry = new THREE.ShapeGeometry(triangleShape);
           const triangleColorRGBA = GlobalStyles.rgba.colorTraffic.normal;
           const triangleColor = new THREE.Color(triangleColorRGBA.r, triangleColorRGBA.g, triangleColorRGBA.b);
-          const triangleMaterial = new THREE.MeshBasicMaterial({ color: triangleColor, side: THREE.DoubleSide, transparent: true, opacity: triangleColorRGBA.a });
+          const triangleMaterial = new THREE.MeshBasicMaterial({
+            color: triangleColor, side: THREE.DoubleSide, transparent: true, opacity: triangleColorRGBA.a
+          });
 
           const triangleMesh = new THREE.Mesh(triangleGeometry, triangleMaterial);
-          triangleMesh.position.set(0, 0, this.depth + 3);
+          triangleMesh.position.set(0, 0, this.surfaceDepth + 3);
           triangleMesh.rotateZ((Math.PI * 2) - (linePosition - (Math.PI / 2)));
           this.arcMeterSegments.push(triangleMesh);
           this.container.add(triangleMesh);
@@ -362,11 +372,11 @@ class FocusedNodeView extends NodeView {
     this.innerCircleMaterial.opacity = borderOpacity;
     this.textMaterial.opacity = opacity;
 
-    _.each(this.donutGraphSegments, (segment) => {
+    each(this.donutGraphSegments, (segment) => {
       segment.material.opacity = opacity * segment.userData.defaultOpacity;
     });
 
-    _.each(this.arcMeterSegments, (segment) => {
+    each(this.arcMeterSegments, (segment) => {
       segment.material.opacity = opacity * segment.userData.defaultOpacity;
     });
   }
@@ -375,7 +385,7 @@ class FocusedNodeView extends NodeView {
     const slice = new THREE.RingGeometry(this.innerRadius, this.radius, 30, 8, 0, Math.PI * 2 * 0.2);
     const mat = new THREE.MeshBasicMaterial({ color: GlobalStyles.styles.colorTraffic.normal, side: THREE.DoubleSide });
     this.loadingSpinner = new THREE.Mesh(slice, mat);
-    this.loadingSpinner.position.set(0, 0, this.depth + 2);
+    this.loadingSpinner.position.set(0, 0, this.surfaceDepth + 2);
     this.container.add(this.loadingSpinner);
     this.refresh(true);
   }
