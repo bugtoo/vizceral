@@ -21,6 +21,7 @@ import BaseView from './baseView';
 import ConnectionNoticeView from './connectionNoticeView';
 import GlobalStyles from '../globalStyles';
 import Constants from './constants';
+import ShapeFactory from './ShapesFactory';
 
 // Preload textures
 const loader = new THREE.TextureLoader();
@@ -81,11 +82,11 @@ const baseShaderMaterial = new THREE.ShaderMaterial({
   transparent: true
 });
 
-function normalDistribution () {
+function normalDistribution() {
   return (((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3) + 0.5;
 }
 
-function generateParticleSystem (size, customWidth, connectionWidth, connectionDepth) {
+function generateParticleSystem(size, customWidth, connectionWidth, connectionDepth, normalY) {
   const vertices = new Float32Array(size * 3);
   const customColors = new Float32Array(size * 3);
   const customOpacities = new Float32Array(size);
@@ -97,6 +98,7 @@ function generateParticleSystem (size, customWidth, connectionWidth, connectionD
     vertices[i * 3] = 0;
     vertices[(i * 3) + 1] = customWidth ? connectionWidth - (normalDistribution() * connectionWidth * 2) : 1;
     vertices[(i * 3) + 2] = customWidth ? connectionDepth - (normalDistribution() * connectionDepth * 2) : -2;
+    // normalY[i] = vertices[(i * 3) + 1];
 
     // Custom colors
     customColors[i] = GlobalStyles.rgba.colorTraffic.normal.r;
@@ -121,13 +123,13 @@ function generateParticleSystem (size, customWidth, connectionWidth, connectionD
 }
 
 
-function copyArray (destination, source) {
+function copyArray(destination, source) {
   for (let i = 0; i < source.length && i < destination.length; i++) {
     destination[i] = source[i];
   }
 }
 
-function copyParticleSystemState (newPs, oldPs) {
+function copyParticleSystemState(newPs, oldPs) {
   const positionAttr = newPs.geometry.getAttribute('position');
   copyArray(positionAttr.array, oldPs.geometry.getAttribute('position').array);
   positionAttr.needsUpdate = true;
@@ -145,11 +147,11 @@ function copyParticleSystemState (newPs, oldPs) {
 
 // given two points on a line and an x coordinate between them, compute the corresponding Y.
 // https://en.wikipedia.org/wiki/Linear_interpolation
-function interpolateY (x, x0, y0, x1, y1) {
+function interpolateY(x, x0, y0, x1, y1) {
   return (y0 + (((x - x0) * (y1 - y0)) / (x1 - x0))) || 0; // avoid NaN
 }
 
-function mapVolume (volume, rateMap) {
+function mapVolume(volume, rateMap) {
   let i;
 
   for (i = 0; i < rateMap.length && rateMap[i + 1] && volume > rateMap[i + 1][0]; i++) { // eslint-disable-line no-empty
@@ -162,7 +164,7 @@ function mapVolume (volume, rateMap) {
   return interpolateY(volume, rateMap[i][0], rateMap[i][1], rateMap[i + 1][0], rateMap[i + 1][1]);
 }
 
-function mapVolumesToReleasesPerTick (volumes, rateMap) {
+function mapVolumesToReleasesPerTick(volumes, rateMap) {
   const result = [];
   for (const volumeName in volumes) { // eslint-disable-line no-restricted-syntax
     if (volumes.hasOwnProperty(volumeName)) { // eslint-disable-line no-prototype-builtins
@@ -185,20 +187,22 @@ function mapVolumesToReleasesPerTick (volumes, rateMap) {
   return result;
 }
 
-function rptToRPS (rpt) {
+function rptToRPS(rpt) {
   return rpt * 60;
 }
 
-function rptToSPR (rpt) {
+function rptToSPR(rpt) {
   return 1 / rptToRPS(rpt);
 }
 
 
 class ConnectionView extends BaseView {
-  constructor (connection, maxParticles, customWidth) {
+  constructor(connection, maxParticles, customWidth) {
     super(connection);
     this.setParticleLevels();
     this.maxParticles = maxParticles;
+    this.magnitude = 0;
+    this.icon = null;
 
     this.dimmedLevel = 0.05;
 
@@ -223,8 +227,10 @@ class ConnectionView extends BaseView {
 
     this.lastParticleIndex = this.particleSystemSize - 1;
     this.freeIndexes = [];
+    this.yIndexes = [];
+    this.normalY = [];
 
-    const ps = generateParticleSystem(this.particleSystemSize, this.customWidth, this.connectionWidth, this.connectionDepth);
+    const ps = generateParticleSystem(this.particleSystemSize, this.customWidth, this.connectionWidth, this.connectionDepth, this.normalY);
     for (let i = 0; i < this.particleSystemSize; i++) {
       this.freeIndexes[i] = i;
     }
@@ -234,7 +240,6 @@ class ConnectionView extends BaseView {
     this.positionAttr = this.particles.geometry.getAttribute('position');
     this.opacityAttr = this.particles.geometry.getAttribute('customOpacity');
     this.container.add(this.particles);
-
     // Line used to support interactivity
     this.interactiveLineGeometry = new THREE.Geometry();
     this.interactiveLineMaterial = new THREE.LineBasicMaterial({
@@ -246,6 +251,7 @@ class ConnectionView extends BaseView {
     this.interactiveLine = new THREE.Line(this.interactiveLineGeometry, this.interactiveLineMaterial);
     this.addInteractiveChild(this.interactiveLine);
     this.container.add(this.interactiveLine);
+    this.addConnectionLine();
 
     // Add the connection notice
     this.noticeView = new ConnectionNoticeView(this);
@@ -255,11 +261,31 @@ class ConnectionView extends BaseView {
     this.updateVolume();
   }
 
-  setParticleLevels () {
+  addConnectionLine() {
+    const shape = ShapeFactory.getShape({ node_type: 'warning' });
+    // shape.scale(100);
+    const geometry = shape.innergeometry;
+    // geometry.translate(200 / 2, 0);
+    this.icon = new THREE.Mesh(geometry, shape.material);
+    this.lineColor = GlobalStyles.rgba.colorConnectionLine;
+    this.connectionLineGeometry = new THREE.Geometry();
+    this.connectionLineMaterial = new THREE.LineBasicMaterial({
+      color: new THREE.Color(this.lineColor.r, this.lineColor.g, this.lineColor.b),
+      blending: THREE.AdditiveBlending,
+      depthTest: true,
+      depthWrite: false,
+      transparent: true,
+      opacity: this.lineColor.a
+    });
+    this.connectionLine = new THREE.Line(this.connectionLineGeometry, this.connectionLineMaterial);
+    this.container.add(this.connectionLine);
+  }
+
+  setParticleLevels() {
     this.maxParticleReleasedPerTick = 19;
   }
 
-  growParticles (bumpSize) {
+  growParticles(bumpSize) {
     const newSize = bumpSize + this.particleSystemSize;
 
     for (let i = this.particleSystemSize; i < newSize; i++) {
@@ -293,12 +319,12 @@ class ConnectionView extends BaseView {
     return this.nextFreeParticleIndex();
   }
 
-  freeParticleIndex (i) {
+  freeParticleIndex(i) {
     this.lastParticleIndex = Math.max(this.lastParticleIndex + 1, 0);
     this.freeIndexes[this.lastParticleIndex] = i;
   }
 
-  nextFreeParticleIndex (totalAsk) {
+  nextFreeParticleIndex(totalAsk) {
     if (this.lastParticleIndex < 0) {
       if (this.particleSystemSize >= this.maxParticles) {
         return -1;
@@ -311,16 +337,20 @@ class ConnectionView extends BaseView {
     return indx;
   }
 
-  setOpacity (opacity) {
+  setOpacity(opacity) {
     super.setOpacity(opacity);
     this.uniforms.opacity.value = opacity;
 
     if (this.object.hasNotices()) {
       this.noticeView.setOpacity(opacity);
     }
+    if (this.connectionLine) {
+      this.connectionLine.material.opacity = opacity * this.lineColor.a;
+      this.icon.material.opacity = opacity * this.lineColor.a;
+    }
   }
 
-  setHighlight (highlight) {
+  setHighlight(highlight) {
     // TODO: Actually highlight the connection
     if (this.highlight !== highlight) {
       this.highlight = highlight;
@@ -329,7 +359,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  updatePosition (depthOnly) {
+  updatePosition(depthOnly) {
     this.depth = this.dimmed ? Constants.DEPTH.dimmedConnection : Constants.DEPTH.normalConnection;
 
     // Position and rotate the connection to be between the two nodes
@@ -360,9 +390,13 @@ class ConnectionView extends BaseView {
     if (this.noticeView) {
       this.noticeView.updatePosition();
     }
+
+    if (this.connectionLine) {
+      this.positionConnectingLine();
+    }
   }
 
-  validateNotices () {
+  validateNotices() {
     if (this.object.hasNotices()) {
       this.noticeView.updateNoticeIcon();
       this.addInteractiveChildren(this.noticeView.getInteractiveChildren());
@@ -373,7 +407,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  updateVolume () {
+  updateVolume() {
     // maps the releationship of metric values to how many dots should be released per tick. use < 1 dots per release for fewer than 60 dots per second.
     // [[0, 0], [this.object.volumeGreatest, this.maxParticleReleasedPerTick]] is a straight linear releationship. not great for the left side of the normal distribution -- dots will fire too rarely.
     //  must be in ascending order.
@@ -382,7 +416,7 @@ class ConnectionView extends BaseView {
     const maxReleasesPerTick = this.maxParticleReleasedPerTick;
     const linearRatio = maxReleasesPerTick / maxVolume;
 
-    function secondsPerReleaseToReleasesPerTick (seconds) {
+    function secondsPerReleaseToReleasesPerTick(seconds) {
       const releasesPerSecond = 1 / seconds;
       return releasesPerSecond / 60;
     }
@@ -402,7 +436,7 @@ class ConnectionView extends BaseView {
     this.releasesPerTick = mapVolumesToReleasesPerTick(this.object.volume, this.rateMap);
   }
 
-  launchParticles (numberOfParticles, key, startX) {
+  launchParticles(numberOfParticles, key, startX) {
     let rand; // eslint-disable-line prefer-const
     let i;
     numberOfParticles = numberOfParticles || 1;
@@ -428,7 +462,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  update () {
+  update() {
     let vx;
     let i;
     let j;
@@ -459,25 +493,89 @@ class ConnectionView extends BaseView {
 
     // Update the position of all particles in flight
     for (i = 0, j = 0; i < this.positionAttr.array.length; i += 3, j += 1) {
+      if (!this.curveY) {
+        this.curveY = [];
+      }
       vx = this.positionAttr.array[i];
+      if (!this.yIndexes[j]) {
+        this.yIndexes[j] = this.positionAttr.array[i + 1];
+      }
 
       if (vx !== 0) {
         vx += this.velocity[i];
         if (vx >= this.length) {
           this.freeParticleIndex(j);
+          this.yIndexes[j] = 0;
+          this.curveY[j] = null;
           vx = 0;
         }
       }
+
+
+      // const magn = 300
+      const reso = 1000;
       this.positionAttr.array[i] = vx;
+      if (this.magnitude !== 0) {
+        // this.setParticleColor(j, {r: 255, g: 0, b: 0});
+        const middle = this.length / 2;
+        const ratio = vx / this.length;
+        if (!this.curveY[j]) {
+          const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(middle, this.magnitude * 2, 0), new THREE.Vector3(this.length, 0, 0));
+          const points = curve.getPoints(reso);
+          this.curveY[j] = points;
+        }
+        if (this.yIndexes[j] + this.curveY[j][Math.floor(ratio * reso)]) {
+          this.positionAttr.array[i + 1] = this.yIndexes[j] + this.curveY[j][Math.floor(ratio * reso)].y;
+        }
+      }
+      // if (vx < middle) {
+      // }
+      // else {
+      //   this.positionAttr.array[i + 1] = this.yIndexes[j] + points[Math.floor((2 - ratio) * 100)];
+      // }
     }
     this.positionAttr.needsUpdate = true;
   }
 
-  refresh () {
+  refresh() {
     this.validateNotices();
   }
 
-  setParticleColor (index, color) {
+  setMagnitude(value) {
+    this.magnitude = value;
+  }
+
+  positionConnectingLine() {
+    const start = new THREE.Vector3(this.startPosition.x, this.startPosition.y, this.depth);
+    const end = new THREE.Vector3(this.endPosition.x, this.endPosition.y, this.depth);
+
+    const minX = Math.min(start.x, end.x);
+    const maxX = Math.max(start.x, end.x);
+    const minY = Math.min(start.y, end.y);
+    const maxY = Math.max(start.y, end.y);
+
+    // var seed = minX + maxX + minY + maxY + new Date().getMinutes();
+
+    // function random() {
+    //     var x = Math.sin(seed) * 10000;
+    //     return x - Math.floor(x);
+    // }
+
+    // this.icon.material.opacity = random() > 0.80 ? 1 : 0;
+
+    this.connectionLine.geometry.vertices[0] = start;
+    this.connectionLine.geometry.vertices[0].setZ(this.startPosition.z - 10);
+    this.connectionLine.geometry.vertices[1] = end;
+    this.connectionLine.geometry.vertices[1].setZ(this.startPosition.z - 10);
+    this.connectionLine.geometry.verticesNeedUpdate = true;
+    // this.icon.position.set(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2, 0);
+    // if (!this.done) {
+    //     this.done = true;
+    // }
+    // this.icon.geometry.verticesNeedUpdate = true;
+  }
+
+  setParticleColor(index, color) {
     const colorAttr = this.particles.geometry.getAttribute('customColor');
     colorAttr.setXYZ(index, color.r, color.g, color.b);
     colorAttr.needsUpdate = true;
@@ -486,7 +584,7 @@ class ConnectionView extends BaseView {
     this.opacityAttr.needsUpdate = true;
   }
 
-  setParticleSize (index, size) {
+  setParticleSize(index, size) {
     const sizeAttribute = this.particles.geometry.getAttribute('size');
     if (sizeAttribute) {
       sizeAttribute.setX(index, size);
@@ -494,7 +592,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  cleanup () {
+  cleanup() {
     this.particles.geometry.dispose();
     this.shaderMaterial.dispose();
     this.interactiveLineGeometry.dispose();

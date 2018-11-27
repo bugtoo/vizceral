@@ -34,10 +34,16 @@ class NodeViewStandard extends NodeView {
     this.dotMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(this.dotColor.r, this.dotColor.g, this.dotColor.b), transparent: true, opacity: this.dotColor.a });
     // custom shapes support. node_type property should be defined for a node in json. If node_type is missing or undefined, the default shape (circle) will be picked up
     const shape = ShapesFactory.getShape(service);
+    shape.scale(this.radius / defaultRadius);
 
-    this.meshes.innerCircle = this.addChildElement(shape.innergeometry, shape.material);
-    this.meshes.outerBorder = this.addChildElement(shape.outerborder, shape.bordermaterial);
-
+    // this.meshes.innerCircle = this.addChildElement(shape.innergeometry, shape.material);
+    const sprite = new THREE.Sprite(shape.material);
+    sprite.scale.set(200, 200, 1);
+    this.meshes.innerCircle = {
+      geometry: sprite,
+    };
+    this.container.add(sprite);
+    // this.meshes.outerBorder = this.addChildElement(shape.outerborder, shape.bordermaterial);
 
     this.meshes.noticeDot = this.addChildElement(NodeView.getNoticeDotGeometry(this.radius), this.dotMaterial);
     this.refreshNotices();

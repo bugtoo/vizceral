@@ -50,7 +50,7 @@ class ShapeParent {
   }
 
   _createMaterial(rgb) {
-    return new THREE.MeshBasicMaterial({ color: rgb });
+    return new THREE.MeshBasicMaterial({ color: rgb, side: THREE.DoubleSide });
   }
 
 }

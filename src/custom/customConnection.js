@@ -16,13 +16,12 @@
  *
  */
 import Connection from '../base/connection';
-import GlobalConnectionView from './globalConnectionView';
+import ConnectionView from '../base/connectionView';
 
-class GlobalConnection extends Connection {
+class CustomConnection extends Connection {
   constructor (options) {
     super(options);
-    this.graphRenderer = 'global';
-    this.magnitude = 0;
+    this.graphRenderer = 'custom';
   }
 
   update (data) {
@@ -33,17 +32,7 @@ class GlobalConnection extends Connection {
   }
 
   render () {
-    this.view = new GlobalConnectionView(this);
-    if (this.magnitude && this.magnitude !== 0) {
-      this.view.setMagnitude(this.magnitude);
-    }
-  }
-
-  setMagnitude (value) {
-    if (this.view) {
-      this.view.setMagnitude(value);
-    }
-    this.magnitude = value;
+    this.view = new ConnectionView(this);
   }
 
   isInteractive () {
@@ -51,4 +40,4 @@ class GlobalConnection extends Connection {
   }
 }
 
-export default GlobalConnection;
+export default CustomConnection;

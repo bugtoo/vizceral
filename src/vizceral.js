@@ -35,6 +35,7 @@ import LTRTreeLayout from './layouts/ltrTreeLayout';
 import RegionTrafficGraph from './region/regionTrafficGraph';
 import RingCenterLayout from './layouts/ringCenterLayout';
 import RingLayout from './layouts/ringLayout';
+import xRingLayout from './layouts/xRingLayout';
 
 import RendererUtils from './rendererUtils';
 import MoveNodeInteraction from './moveNodeInteraction';
@@ -128,6 +129,25 @@ class Vizceral extends EventEmitter {
     // Setup lighting
     this.scene.add(new THREE.AmbientLight(0xffffff));
 
+    // var geometry = new THREE.CircleGeometry( graphHeight * 0.5 / 2 - 100, 64);
+    // var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    // geometry.translate(0, 0, -19000);
+    // var circle = new THREE.Mesh( geometry, material );
+    // this.scene.add( circle );
+
+    // var geometry = new THREE.CircleGeometry( graphHeight * 0.25, 64);
+    // var material = new THREE.MeshBasicMaterial( { color: 0xfdfd96 } );
+    // geometry.translate(0, 0, -19001);
+    // var circle = new THREE.Mesh( geometry, material );
+    // this.scene.add( circle );
+
+    // this.scene.add(new THREE.AmbientLight(0xffffff));
+    // var geometry = new THREE.CircleGeometry((graphHeight * 0.25) * 2, 64);
+    // geometry.translate(0, 0, -19002);
+    // var material = new THREE.MeshBasicMaterial( { color: 0xADD8E6 } );
+    // var circle = new THREE.Mesh( geometry, material );
+    // this.scene.add( circle );
+
     // Mouse/Touch interactivity
     this.raycaster_mouseLocation_viewportSpace = new THREE.Vector2(-1, -1);
     this.raycaster = new THREE.Raycaster();
@@ -166,7 +186,8 @@ class Vizceral extends EventEmitter {
       ltrTree: LTRTreeLayout,
       dns: DNSLayout,
       ringCenter: RingCenterLayout,
-      ring: RingLayout
+      ring: RingLayout,
+      xRing: xRingLayout,
     };
     this.moveNodeInteraction.setEnabled(this.options.allowDraggingOfNodes);
   }
@@ -222,7 +243,7 @@ class Vizceral extends EventEmitter {
           if (graphData.layout && !this.layouts[graphData.layout]) {
             Console.log(`Attempted to create a graph with a layout type that does not exist: ${graphData.layout}. Using default layout for graph type.`);
           }
-          graph = new (this.renderers[graphData.renderer])(graphData.name, mainView, parentGraph, width, height, this.layouts[graphData.layout], graphData.entryNode);
+          graph = new (this.renderers[graphData.renderer])(graphData.name, mainView, parentGraph, width, height, this.layouts[graphData.layout], graphData.entryNode, graphData.connectionType);
           this._attachGraphHandlers(graph);
           graph.setFilters(this.filters);
           graph.showLabels(this.options.showLabels);
