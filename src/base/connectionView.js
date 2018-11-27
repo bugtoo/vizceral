@@ -82,11 +82,11 @@ const baseShaderMaterial = new THREE.ShaderMaterial({
   transparent: true
 });
 
-function normalDistribution() {
+function normalDistribution () {
   return (((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3) + 0.5;
 }
 
-function generateParticleSystem(size, customWidth, connectionWidth, connectionDepth, normalY) {
+function generateParticleSystem (size, customWidth, connectionWidth, connectionDepth, normalY) {
   const vertices = new Float32Array(size * 3);
   const customColors = new Float32Array(size * 3);
   const customOpacities = new Float32Array(size);
@@ -123,13 +123,13 @@ function generateParticleSystem(size, customWidth, connectionWidth, connectionDe
 }
 
 
-function copyArray(destination, source) {
+function copyArray (destination, source) {
   for (let i = 0; i < source.length && i < destination.length; i++) {
     destination[i] = source[i];
   }
 }
 
-function copyParticleSystemState(newPs, oldPs) {
+function copyParticleSystemState (newPs, oldPs) {
   const positionAttr = newPs.geometry.getAttribute('position');
   copyArray(positionAttr.array, oldPs.geometry.getAttribute('position').array);
   positionAttr.needsUpdate = true;
@@ -147,11 +147,11 @@ function copyParticleSystemState(newPs, oldPs) {
 
 // given two points on a line and an x coordinate between them, compute the corresponding Y.
 // https://en.wikipedia.org/wiki/Linear_interpolation
-function interpolateY(x, x0, y0, x1, y1) {
+function interpolateY (x, x0, y0, x1, y1) {
   return (y0 + (((x - x0) * (y1 - y0)) / (x1 - x0))) || 0; // avoid NaN
 }
 
-function mapVolume(volume, rateMap) {
+function mapVolume (volume, rateMap) {
   let i;
 
   for (i = 0; i < rateMap.length && rateMap[i + 1] && volume > rateMap[i + 1][0]; i++) { // eslint-disable-line no-empty
@@ -164,7 +164,7 @@ function mapVolume(volume, rateMap) {
   return interpolateY(volume, rateMap[i][0], rateMap[i][1], rateMap[i + 1][0], rateMap[i + 1][1]);
 }
 
-function mapVolumesToReleasesPerTick(volumes, rateMap) {
+function mapVolumesToReleasesPerTick (volumes, rateMap) {
   const result = [];
   for (const volumeName in volumes) { // eslint-disable-line no-restricted-syntax
     if (volumes.hasOwnProperty(volumeName)) { // eslint-disable-line no-prototype-builtins
@@ -187,17 +187,17 @@ function mapVolumesToReleasesPerTick(volumes, rateMap) {
   return result;
 }
 
-function rptToRPS(rpt) {
+function rptToRPS (rpt) {
   return rpt * 60;
 }
 
-function rptToSPR(rpt) {
+function rptToSPR (rpt) {
   return 1 / rptToRPS(rpt);
 }
 
 
 class ConnectionView extends BaseView {
-  constructor(connection, maxParticles, customWidth) {
+  constructor (connection, maxParticles, customWidth) {
     super(connection);
     this.setParticleLevels();
     this.maxParticles = maxParticles;
@@ -261,7 +261,7 @@ class ConnectionView extends BaseView {
     this.updateVolume();
   }
 
-  addConnectionLine() {
+  addConnectionLine () {
     const shape = ShapeFactory.getShape({ node_type: 'warning' });
     // shape.scale(100);
     const geometry = shape.innergeometry;
@@ -281,11 +281,11 @@ class ConnectionView extends BaseView {
     this.container.add(this.connectionLine);
   }
 
-  setParticleLevels() {
+  setParticleLevels () {
     this.maxParticleReleasedPerTick = 19;
   }
 
-  growParticles(bumpSize) {
+  growParticles (bumpSize) {
     const newSize = bumpSize + this.particleSystemSize;
 
     for (let i = this.particleSystemSize; i < newSize; i++) {
@@ -319,12 +319,12 @@ class ConnectionView extends BaseView {
     return this.nextFreeParticleIndex();
   }
 
-  freeParticleIndex(i) {
+  freeParticleIndex (i) {
     this.lastParticleIndex = Math.max(this.lastParticleIndex + 1, 0);
     this.freeIndexes[this.lastParticleIndex] = i;
   }
 
-  nextFreeParticleIndex(totalAsk) {
+  nextFreeParticleIndex (totalAsk) {
     if (this.lastParticleIndex < 0) {
       if (this.particleSystemSize >= this.maxParticles) {
         return -1;
@@ -337,7 +337,7 @@ class ConnectionView extends BaseView {
     return indx;
   }
 
-  setOpacity(opacity) {
+  setOpacity (opacity) {
     super.setOpacity(opacity);
     this.uniforms.opacity.value = opacity;
 
@@ -350,7 +350,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  setHighlight(highlight) {
+  setHighlight (highlight) {
     // TODO: Actually highlight the connection
     if (this.highlight !== highlight) {
       this.highlight = highlight;
@@ -359,7 +359,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  updatePosition(depthOnly) {
+  updatePosition (depthOnly) {
     this.depth = this.dimmed ? Constants.DEPTH.dimmedConnection : Constants.DEPTH.normalConnection;
 
     // Position and rotate the connection to be between the two nodes
@@ -396,7 +396,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  validateNotices() {
+  validateNotices () {
     if (this.object.hasNotices()) {
       this.noticeView.updateNoticeIcon();
       this.addInteractiveChildren(this.noticeView.getInteractiveChildren());
@@ -407,7 +407,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  updateVolume() {
+  updateVolume () {
     // maps the releationship of metric values to how many dots should be released per tick. use < 1 dots per release for fewer than 60 dots per second.
     // [[0, 0], [this.object.volumeGreatest, this.maxParticleReleasedPerTick]] is a straight linear releationship. not great for the left side of the normal distribution -- dots will fire too rarely.
     //  must be in ascending order.
@@ -416,7 +416,7 @@ class ConnectionView extends BaseView {
     const maxReleasesPerTick = this.maxParticleReleasedPerTick;
     const linearRatio = maxReleasesPerTick / maxVolume;
 
-    function secondsPerReleaseToReleasesPerTick(seconds) {
+    function secondsPerReleaseToReleasesPerTick (seconds) {
       const releasesPerSecond = 1 / seconds;
       return releasesPerSecond / 60;
     }
@@ -436,7 +436,7 @@ class ConnectionView extends BaseView {
     this.releasesPerTick = mapVolumesToReleasesPerTick(this.object.volume, this.rateMap);
   }
 
-  launchParticles(numberOfParticles, key, startX) {
+  launchParticles (numberOfParticles, key, startX) {
     let rand; // eslint-disable-line prefer-const
     let i;
     numberOfParticles = numberOfParticles || 1;
@@ -462,7 +462,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  update() {
+  update () {
     let vx;
     let i;
     let j;
@@ -537,15 +537,15 @@ class ConnectionView extends BaseView {
     this.positionAttr.needsUpdate = true;
   }
 
-  refresh() {
+  refresh () {
     this.validateNotices();
   }
 
-  setMagnitude(value) {
+  setMagnitude (value) {
     this.magnitude = value;
   }
 
-  positionConnectingLine() {
+  positionConnectingLine () {
     const start = new THREE.Vector3(this.startPosition.x, this.startPosition.y, this.depth);
     const end = new THREE.Vector3(this.endPosition.x, this.endPosition.y, this.depth);
 
@@ -575,7 +575,7 @@ class ConnectionView extends BaseView {
     // this.icon.geometry.verticesNeedUpdate = true;
   }
 
-  setParticleColor(index, color) {
+  setParticleColor (index, color) {
     const colorAttr = this.particles.geometry.getAttribute('customColor');
     colorAttr.setXYZ(index, color.r, color.g, color.b);
     colorAttr.needsUpdate = true;
@@ -584,7 +584,7 @@ class ConnectionView extends BaseView {
     this.opacityAttr.needsUpdate = true;
   }
 
-  setParticleSize(index, size) {
+  setParticleSize (index, size) {
     const sizeAttribute = this.particles.geometry.getAttribute('size');
     if (sizeAttribute) {
       sizeAttribute.setX(index, size);
@@ -592,7 +592,7 @@ class ConnectionView extends BaseView {
     }
   }
 
-  cleanup() {
+  cleanup () {
     this.particles.geometry.dispose();
     this.shaderMaterial.dispose();
     this.interactiveLineGeometry.dispose();

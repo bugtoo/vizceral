@@ -26,7 +26,7 @@ import './shapes/CommonShapes';
 const defaultRadius = 16;
 
 class NodeViewStandard extends NodeView {
-  constructor(service) {
+  constructor (service) {
     super(service);
     this.radius = this.object.size || defaultRadius;
 
@@ -53,14 +53,14 @@ class NodeViewStandard extends NodeView {
     this.showLabel(this.object.options.showLabel);
   }
 
-  setOpacity(opacity) {
+  setOpacity (opacity) {
     super.setOpacity(opacity);
     if (this.object.hasNotices()) {
       this.dotMaterial.opacity = opacity * this.dotColor.a;
     }
   }
 
-  refreshNotices() {
+  refreshNotices () {
     if (this.object.hasNotices()) {
       const noticeSeverity = this.object.highestNoticeLevel();
       this.dotColor = GlobalStyles.getColorSeverityRGBA(noticeSeverity);
@@ -72,7 +72,7 @@ class NodeViewStandard extends NodeView {
     }
   }
 
-  refresh(force) {
+  refresh (force) {
     super.refresh(force);
 
     // Refresh severity

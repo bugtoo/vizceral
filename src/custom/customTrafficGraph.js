@@ -65,7 +65,7 @@ class CustomTrafficGraph extends TrafficGraph {
   }
 
   setState (state, force) {
-        // Remove old nodes
+    // Remove old nodes
     for (let i = this.state.nodes.length - 1; i >= 0; i--) {
       const newNodeIndex = _.findIndex(state.nodes, { name: this.state.nodes[i].name });
       if (newNodeIndex === -1) {
@@ -74,21 +74,21 @@ class CustomTrafficGraph extends TrafficGraph {
       }
     }
 
-        // Add new nodes and update existing nodes
+    // Add new nodes and update existing nodes
     _.each(state.nodes, (node) => {
       const existingNodeIndex = _.findIndex(this.state.nodes, { name: node.name });
       if (existingNodeIndex !== -1) {
-                // If the node already exists, replace the node
+        // If the node already exists, replace the node
         this.state.nodes[existingNodeIndex] = node;
       } else {
-                // Add new node
+        // Add new node
         this.layoutValid = false;
         this.state.nodes.push(node);
         this.validateContextDiv(node.name);
       }
     });
 
-        // Remove old connections
+    // Remove old connections
     for (let i = this.state.connections.length - 1; i >= 0; i--) {
       const newConnectionIndex = _.findIndex(state.connections, { source: this.state.connections[i].source, target: this.state.connections[i].target });
       if (newConnectionIndex === -1) {
@@ -96,7 +96,7 @@ class CustomTrafficGraph extends TrafficGraph {
       }
     }
 
-        // Add new connection and update existing connectiond
+    // Add new connection and update existing connectiond
     _.each(state.connections, (newConnection) => {
       const existingConnectionIndex = _.findIndex(this.state.connections, { source: newConnection.source, target: newConnection.target });
       if (existingConnectionIndex !== -1) {
@@ -106,13 +106,13 @@ class CustomTrafficGraph extends TrafficGraph {
       }
     });
 
-        // update maxVolume
-        // depending on how the data gets fed, we might not have a global max volume.
-        // If we do not, calculate it based on all the second level nodes max volume.
-        //
-        // Just for visual sake, we set the max volume to 150% of the greatest
-        // connection volume. This allows for buffer room for failover traffic to be
-        // more visually dense.
+    // update maxVolume
+    // depending on how the data gets fed, we might not have a global max volume.
+    // If we do not, calculate it based on all the second level nodes max volume.
+    //
+    // Just for visual sake, we set the max volume to 150% of the greatest
+    // connection volume. This allows for buffer room for failover traffic to be
+    // more visually dense.
     let maxVolume = state.maxVolume || 0;
     if (!maxVolume) {
       _.each(this.state.nodes, (node) => {
@@ -121,7 +121,7 @@ class CustomTrafficGraph extends TrafficGraph {
     }
     this.state.maxVolume = maxVolume * 1.5;
 
-        // setting this.state.entryNode to pass it to super.setState
+    // setting this.state.entryNode to pass it to super.setState
     this.state.entryNode = state.entryNode;
 
     super.setState(this.state, force);
@@ -129,7 +129,7 @@ class CustomTrafficGraph extends TrafficGraph {
   }
 
   setFilters () {
-        // no-op
+    // no-op
   }
 
   handleIntersectedObjectClick () {
@@ -180,7 +180,7 @@ class CustomTrafficGraph extends TrafficGraph {
   }
 
   highlightObject () {
-        // no-op
+    // no-op
   }
 
   update (time) {

@@ -29,7 +29,7 @@ ShapesFactory.registerShape = function (shapeName, shapeClass) {
 };
 
 ShapesFactory.registerSVG = function (shapeName, svg, scale) {
-  function resizeCanvas(canvas, width, height) {
+  function resizeCanvas (canvas, width, height) {
     const context = canvas.getContext('2d');
 
     // Store the context information we care about
@@ -53,7 +53,7 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
     context.scale(ratio, ratio);
   }
 
-  function createCanvas(width, height) {
+  function createCanvas (width, height) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
 
@@ -179,11 +179,12 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
 
 
   class ShapeSVG extends ShapeParent {
-    constructor(node) {
+    constructor (node) {
       super(node);
       this.material = material;
     }
-    _createInnerGeometry() {
+
+    _createInnerGeometry () {
       return geometry.clone();
     }
   }

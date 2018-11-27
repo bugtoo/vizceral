@@ -33,6 +33,7 @@ class ShapeService extends ShapeParent {
 
     return new THREE.ShapeGeometry(shapes, curveSegments);
   }
+
   _createOuterBorder (radius, curveSegments) {
     const shapes = [];
     const border = new THREE.Shape();
