@@ -15,12 +15,12 @@
  *     limitations under the License.
  *
  */
-import { merge, reduce } from 'lodash';
-import chroma from 'chroma-js';
+import { merge, reduce } from "lodash";
+import chroma from "chroma-js";
 
 const Console = console;
 
-function getRGBA (color) {
+function getRGBA(color) {
   const chromaColor = chroma(color);
   const rgb = chromaColor.rgb();
   return {
@@ -32,51 +32,63 @@ function getRGBA (color) {
 }
 
 class GlobalStyles {
-  constructor () {
+  constructor() {
     this.styles = {
-      colorText: 'rgb(214, 214, 214)',
-      colorTextDisabled: 'rgb(129, 129, 129)',
+      colorText: "rgb(214, 214, 214)",
+      colorTextDisabled: "rgb(129, 129, 129)",
       colorTraffic: {
-        normal: 'rgb(186, 213, 237)',
-        normalDonut: 'rgb(91, 91, 91)',
-        warning: 'rgb(268, 185, 73)',
-        danger: 'rgb(184, 36, 36)'
+        normal: "rgb(186, 213, 237)",
+        normalDonut: "rgb(91, 91, 91)",
+        warning: "rgb(268, 185, 73)",
+        danger: "rgb(184, 36, 36)"
       },
-      colorNormalDimmed: 'rgb(101, 117, 128)',
-      colorBackgroundDark: 'rgb(35, 35, 35)',
-      colorLabelBorder: 'rgb(16, 17, 18)',
-      colorLabelText: 'rgb(0, 0, 0)',
-      colorDonutInternalColor: 'rgb(35, 35, 35)',
-      colorDonutInternalColorHighlighted: 'rgb(255, 255, 255)',
-      colorConnectionLine: 'rgb(91, 91, 91)',
-      colorPageBackground: 'rgb(45, 45, 45)',
-      colorPageBackgroundTransparent: 'rgba(45, 45, 45, 0)',
-      colorBorderLines: 'rgb(137, 137, 137)',
-      colorArcBackground: 'rgb(60, 60, 60)'
+      colorNormalDimmed: "rgb(101, 117, 128)",
+      colorBackgroundDark: "rgb(35, 35, 35)",
+      colorLabelBorder: "rgb(16, 17, 18)",
+      colorLabelText: "rgb(0, 0, 0)",
+      colorDonutInternalColor: "rgb(35, 35, 35)",
+      colorDonutInternalColorHighlighted: "rgb(255, 255, 255)",
+      colorConnectionLine: "rgb(91, 91, 91)",
+      colorPageBackground: "rgb(45, 45, 45)",
+      colorPageBackgroundTransparent: "rgba(45, 45, 45, 0)",
+      colorBorderLines: "rgb(137, 137, 137)",
+      colorArcBackground: "rgb(60, 60, 60)"
     };
 
     this.updateComputedStyles();
   }
 
-  getColorTraffic (key, highlighted) {
-    const color = !highlighted ? this.styles.colorTraffic[key] : this.styles.colorTrafficHighlighted[key];
+  getColorTraffic(key, highlighted) {
+    const color = !highlighted
+      ? this.styles.colorTraffic[key]
+      : this.styles.colorTrafficHighlighted[key];
     if (!color) {
-      Console.warn(`Attempted to get a color for key '${key}', but does not exist. Returned color for key 'normal' instead`);
-      return !highlighted ? this.styles.colorTraffic.normal : this.styles.colorTrafficHighlighted.normal;
+      Console.warn(
+        `Attempted to get a color for key '${key}', but does not exist. Returned color for key 'normal' instead`
+      );
+      return !highlighted
+        ? this.styles.colorTraffic.normal
+        : this.styles.colorTrafficHighlighted.normal;
     }
     return color;
   }
 
-  getColorTrafficRGBA (key, highlighted) {
-    const color = highlighted ? this.rgba.colorTrafficHighlighted[key] : this.rgba.colorTraffic[key];
+  getColorTrafficRGBA(key, highlighted) {
+    const color = highlighted
+      ? this.rgba.colorTrafficHighlighted[key]
+      : this.rgba.colorTraffic[key];
     if (!color) {
-      Console.warn(`Attempted to get a computed color for key '${key}', but does not exist. Returned color for key 'normal' instead`);
-      return highlighted ? this.rgba.colorTrafficHighlighted.normal : this.rgba.colorTraffic.normal;
+      Console.warn(
+        `Attempted to get a computed color for key '${key}', but does not exist. Returned color for key 'normal' instead`
+      );
+      return highlighted
+        ? this.rgba.colorTrafficHighlighted.normal
+        : this.rgba.colorTraffic.normal;
     }
     return color;
   }
 
-  getColorSeverityRGBA (key) {
+  getColorSeverityRGBA(key) {
     return [
       this.rgba.colorTraffic.normal,
       this.rgba.colorTraffic.warning,
@@ -84,35 +96,61 @@ class GlobalStyles {
     ][key];
   }
 
-  updateStyles (styles) {
+  getColorConnectionLine(connection) {
+    if (connection.colorConnectionLine) {
+      return getRGBA(connection.colorConnectionLine);
+    } else {
+      return GlobalStyles.rgba.colorConnectionLine;
+    }
+  }
+
+  updateStyles(styles) {
     merge(this.styles, styles);
     this.updateComputedStyles(styles);
   }
 
-  updateComputedStyles (styles) {
-    this.styles.colorTrafficHighlighted = reduce(this.styles.colorTraffic, (acc, value, key) => {
-      if (styles && styles.colorTrafficHighlighted && styles.colorTrafficHighlighted[key]) {
-        acc[key] = styles.colorTrafficHighlighted[key];
-      } else {
-        acc[key] = chroma(value).brighten(3).css();
-      }
+  updateComputedStyles(styles) {
+    this.styles.colorTrafficHighlighted = reduce(
+      this.styles.colorTraffic,
+      (acc, value, key) => {
+        if (
+          styles &&
+          styles.colorTrafficHighlighted &&
+          styles.colorTrafficHighlighted[key]
+        ) {
+          acc[key] = styles.colorTrafficHighlighted[key];
+        } else {
+          acc[key] = chroma(value)
+            .brighten(3)
+            .css();
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
 
     this.rgba = {
       colorArcBackground: getRGBA(this.styles.colorArcBackground),
       colorConnectionLine: getRGBA(this.styles.colorConnectionLine),
       colorDonutInternalColor: getRGBA(this.styles.colorDonutInternalColor),
       colorPageBackground: getRGBA(this.styles.colorPageBackground),
-      colorTraffic: reduce(this.styles.colorTraffic, (acc, value, key) => {
-        acc[key] = getRGBA(value);
-        return acc;
-      }, {}),
-      colorTrafficHighlighted: reduce(this.styles.colorTrafficHighlighted, (acc, value, key) => {
-        acc[key] = getRGBA(value);
-        return acc;
-      }, {}),
+      colorTraffic: reduce(
+        this.styles.colorTraffic,
+        (acc, value, key) => {
+          acc[key] = getRGBA(value);
+          return acc;
+        },
+        {}
+      ),
+      colorTrafficHighlighted: reduce(
+        this.styles.colorTrafficHighlighted,
+        (acc, value, key) => {
+          acc[key] = getRGBA(value);
+          return acc;
+        },
+        {}
+      )
     };
   }
 }

@@ -15,60 +15,75 @@
  *     limitations under the License.
  *
  */
-import * as THREE from 'three';
+import * as THREE from "three";
 
-import ConnectionView from '../base/connectionView';
-import GlobalStyles from '../globalStyles';
+import ConnectionView from "../base/connectionView";
+import GlobalStyles from "../globalStyles";
 
 class RegionConnectionView extends ConnectionView {
-  constructor (connection) {
+  constructor(connection) {
     super(connection, 650, false);
 
     // Add the connection line
-    this.lineColor = GlobalStyles.rgba.colorConnectionLine;
+    this.lineColor = GlobalStyles.getColorConnectionLine(connection);
     this.connectionLineGeometry = new THREE.Geometry();
     this.connectionLineMaterial = new THREE.LineBasicMaterial({
-      color: new THREE.Color(this.lineColor.r, this.lineColor.g, this.lineColor.b),
+      color: new THREE.Color(
+        this.lineColor.r,
+        this.lineColor.g,
+        this.lineColor.b
+      ),
       blending: THREE.AdditiveBlending,
       depthTest: true,
       depthWrite: false,
       transparent: true,
       opacity: this.lineColor.a
     });
-    this.connectionLine = new THREE.Line(this.connectionLineGeometry, this.connectionLineMaterial);
+    this.connectionLine = new THREE.Line(
+      this.connectionLineGeometry,
+      this.connectionLineMaterial
+    );
     this.container.add(this.connectionLine);
     this.updatePosition();
     this.updateVolume();
   }
 
-  positionConnectingLine () {
-    const start = new THREE.Vector3(this.startPosition.x, this.startPosition.y, this.depth - 1);
-    const end = new THREE.Vector3(this.endPosition.x, this.endPosition.y, this.depth - 1);
+  positionConnectingLine() {
+    const start = new THREE.Vector3(
+      this.startPosition.x,
+      this.startPosition.y,
+      this.depth - 1
+    );
+    const end = new THREE.Vector3(
+      this.endPosition.x,
+      this.endPosition.y,
+      this.depth - 1
+    );
 
     this.connectionLine.geometry.vertices[0] = start;
     this.connectionLine.geometry.vertices[1] = end;
     this.connectionLine.geometry.verticesNeedUpdate = true;
   }
 
-  updatePosition (depthOnly) {
+  updatePosition(depthOnly) {
     super.updatePosition(depthOnly);
     if (this.connectionLine) {
       this.positionConnectingLine();
     }
   }
 
-  setOpacity (opacity) {
+  setOpacity(opacity) {
     super.setOpacity(opacity);
     this.connectionLine.material.opacity = opacity * this.lineColor.a;
   }
 
-  cleanup () {
+  cleanup() {
     super.cleanup();
     this.connectionLineGeometry.dispose();
     this.connectionLineMaterial.dispose();
   }
 
-  setParticleLevels () {
+  setParticleLevels() {
     super.setParticleLevels();
     this.minAvgTicksBetweenRelease = 120;
   }
