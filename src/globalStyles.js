@@ -99,9 +99,8 @@ class GlobalStyles {
   getColorConnectionLine(connection) {
     if (connection.colorConnectionLine) {
       return getRGBA(connection.colorConnectionLine);
-    } else {
-      return GlobalStyles.rgba.colorConnectionLine;
     }
+    return this.rgba.colorConnectionLine;
   }
 
   updateStyles(styles) {
