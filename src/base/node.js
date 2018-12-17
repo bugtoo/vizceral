@@ -46,9 +46,9 @@ class Node extends GraphObject {
 
     this.invalidatedSinceLastViewUpdate = true;
 
-    this.options = {
+    this.options = Object.assign({
       showLabel: true
-    };
+    }, node.options || {});
 
     this.data = {
       volume: NaN,

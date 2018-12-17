@@ -15,34 +15,49 @@
  *     limitations under the License.
  *
  */
-import FocusedNodeView from '../focused/focusedNodeView';
 import Node from '../base/node';
+import FocusedNodeView from '../focused/focusedNodeView';
 import NodeViewStandard from '../base/nodeViewStandard';
 
-class RegionNode extends Node {
-  constructor (node) {
-    const defaultSize = node.nodeView === 'focused' ? 60 : 16;
-    node.size = node.size || defaultSize;
-    super(node, 'region');
-    this.loaded = true;
+class CustomNode extends Node {
+  constructor (node, entryNode) {
+    node.size = node.size || 120;
+    super(node, 'global', entryNode);
+    this.refreshLoaded();
+  }
+
+  isInteractive () {
+    return this.nodes && this.nodes.length > 0;
   }
 
   isDraggable () {
     return true;
   }
 
-  isInteractive () {
-    return true;
+  refreshLoaded () {
+    this.loaded = this.isEntryNode() || (this.nodes && this.nodes.length > 0);
+  }
+
+  invalidateIncomingVolume () {
+    super.invalidateIncomingVolume();
+    this.refreshLoaded();
+  }
+
+  invalidateOutgoingVolume () {
+    super.invalidateOutgoingVolume();
+    this.refreshLoaded();
   }
 
   render () {
-    // Set the default view renderer
-    if (this.nodeView === 'focused') {
+    switch (this.nodeType) {
+    case 'focused':
       this.view = new FocusedNodeView(this);
-    } else {
+      break;
+    default:
       this.view = new NodeViewStandard(this);
+      break;
     }
   }
 }
 
-export default RegionNode;
+export default CustomNode;

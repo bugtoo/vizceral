@@ -22,6 +22,7 @@ class GlobalConnection extends Connection {
   constructor (options) {
     super(options);
     this.graphRenderer = 'global';
+    this.magnitude = 0;
   }
 
   update (data) {
@@ -33,6 +34,16 @@ class GlobalConnection extends Connection {
 
   render () {
     this.view = new GlobalConnectionView(this);
+    if (this.magnitude && this.magnitude !== 0) {
+      this.view.setMagnitude(this.magnitude);
+    }
+  }
+
+  setMagnitude (value) {
+    if (this.view) {
+      this.view.setMagnitude(value);
+    }
+    this.magnitude = value;
   }
 
   isInteractive () {

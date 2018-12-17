@@ -15,34 +15,29 @@
  *     limitations under the License.
  *
  */
-import FocusedNodeView from '../focused/focusedNodeView';
-import Node from '../base/node';
-import NodeViewStandard from '../base/nodeViewStandard';
+import Connection from '../base/connection';
+import ConnectionView from '../base/connectionView';
 
-class RegionNode extends Node {
-  constructor (node) {
-    const defaultSize = node.nodeView === 'focused' ? 60 : 16;
-    node.size = node.size || defaultSize;
-    super(node, 'region');
-    this.loaded = true;
+class CustomConnection extends Connection {
+  constructor (options) {
+    super(options);
+    this.graphRenderer = 'custom';
   }
 
-  isDraggable () {
-    return true;
-  }
-
-  isInteractive () {
-    return true;
+  update (data) {
+    super.update(data);
+    if (this.source.isEntryNode() && data.metrics) {
+      this.target.loaded = true;
+    }
   }
 
   render () {
-    // Set the default view renderer
-    if (this.nodeView === 'focused') {
-      this.view = new FocusedNodeView(this);
-    } else {
-      this.view = new NodeViewStandard(this);
-    }
+    this.view = new ConnectionView(this);
+  }
+
+  isInteractive () {
+    return false;
   }
 }
 
-export default RegionNode;
+export default CustomConnection;

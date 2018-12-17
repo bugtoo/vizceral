@@ -140,6 +140,7 @@ class NodeNameView extends BaseView {
     }
 
     this.container.position.set(x, y, 1);
+    // this.container.position.set(0, 0, 1);
   }
 
   setHighlight (highlight) {
