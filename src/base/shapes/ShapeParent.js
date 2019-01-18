@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import GlobalStyles from '../../globalStyles';
 
 class ShapeParent {
-  constructor(node) {
+  constructor (node) {
     this.customNode = {};
     this.customNode.innergeometry = this._createInnerGeometry(16, 32);
     this.customNode.outerborder = this._createOuterBorder(10, 32);
@@ -33,13 +33,13 @@ class ShapeParent {
     return this.customNode;
   }
 
-  scale(factor) {
+  scale (factor) {
     const scaleParams = new Array(3).fill(factor);
     this.innergeometry = this.innergeometry.scale(...scaleParams);
     this.outerborder = this.outerborder.scale(...scaleParams);
   }
 
-  _createOuterBorder(radius, curveSegments) {
+  _createOuterBorder (radius, curveSegments) {
     const border = new THREE.Shape();
     border.absarc(0, 0, radius * 3.2, 0, Math.PI * 2, false);
     const hole = new THREE.Shape();
@@ -49,7 +49,7 @@ class ShapeParent {
     return new THREE.ShapeGeometry(border, curveSegments);
   }
 
-  _createMaterial(rgb) {
+  _createMaterial (rgb) {
     return new THREE.MeshBasicMaterial({ color: rgb });
   }
 }

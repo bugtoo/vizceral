@@ -15,13 +15,13 @@
  *     limitations under the License.
  *
  */
-import * as THREE from "three";
+import * as THREE from 'three';
 
-import ConnectionView from "../base/connectionView";
-import GlobalStyles from "../globalStyles";
+import ConnectionView from '../base/connectionView';
+import GlobalStyles from '../globalStyles';
 
 class RegionConnectionView extends ConnectionView {
-  constructor(connection) {
+  constructor (connection) {
     super(connection, 650, false);
 
     // Add the connection line
@@ -48,7 +48,7 @@ class RegionConnectionView extends ConnectionView {
     this.updateVolume();
   }
 
-  positionConnectingLine() {
+  positionConnectingLine () {
     const start = new THREE.Vector3(
       this.startPosition.x,
       this.startPosition.y,
@@ -65,25 +65,25 @@ class RegionConnectionView extends ConnectionView {
     this.connectionLine.geometry.verticesNeedUpdate = true;
   }
 
-  updatePosition(depthOnly) {
+  updatePosition (depthOnly) {
     super.updatePosition(depthOnly);
     if (this.connectionLine) {
       this.positionConnectingLine();
     }
   }
 
-  setOpacity(opacity) {
+  setOpacity (opacity) {
     super.setOpacity(opacity);
     this.connectionLine.material.opacity = opacity * this.lineColor.a;
   }
 
-  cleanup() {
+  cleanup () {
     super.cleanup();
     this.connectionLineGeometry.dispose();
     this.connectionLineMaterial.dispose();
   }
 
-  setParticleLevels() {
+  setParticleLevels () {
     super.setParticleLevels();
     this.minAvgTicksBetweenRelease = 120;
   }

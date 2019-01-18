@@ -13,24 +13,24 @@
  *     limitations under the License.
  *
  */
-import * as THREE from 'three';
+import * as THREE from "three";
 // import threeSimplicialComplex from 'three-simplicial-complex';
 // import svgMesh3d from 'svg-mesh-3d';
-import ShapeParent from './shapes/ShapeParent';
+import ShapeParent from "./shapes/ShapeParent";
 
 // const createGeometry = threeSimplicialComplex(THREE);
 
 const ShapesFactory = {};
 ShapesFactory.shapes = [];
-ShapesFactory.registerShape = function (shapeName, shapeClass) {
+ShapesFactory.registerShape = function(shapeName, shapeClass) {
   if (ShapesFactory.shapes[shapeName] === undefined) {
     ShapesFactory.shapes[shapeName] = shapeClass;
   }
 };
 
-ShapesFactory.registerSVG = function (shapeName, svg, scale) {
+ShapesFactory.registerSVG = function(shapeName, svg, scale) {
   function resizeCanvas(canvas, width, height) {
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
 
     // Store the context information we care about
     const font = context.font;
@@ -54,16 +54,15 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
   }
 
   function createCanvas(width, height) {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
     resizeCanvas(canvas, width, height);
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
+    context.textAlign = "center";
+    context.textBaseline = "middle";
 
     return canvas;
   }
-
 
   // const meshData = svgMesh3d(svg, {
   //     scale: 1,
@@ -78,14 +77,16 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
     </svg>
     `;
 
-  const viewBox = svg.attributes.viewBox || { value: '0 0 90 90' };
-  const split = viewBox.value.split(' ');
+  const viewBox = svg.attributes.viewBox || { value: "0 0 90 90" };
+  const split = viewBox.value.split(" ");
   split[2] *= 5;
   split[3] *= 5;
-  svg.attributes.viewBox = split.join(' ');
+  svg.attributes.viewBox = split.join(" ");
 
   const image = new Image();
-  image.src = `data:image/svg+xml;charset-utf-8,${encodeURIComponent(svg.outerHTML)}`;
+  image.src = `data:image/svg+xml;charset-utf-8,${encodeURIComponent(
+    svg.outerHTML
+  )}`;
 
   const canvas = createCanvas(256, 256);
 
@@ -96,21 +97,32 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
   let done = false;
   setInterval(() => {
     if (!done) {
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       context.clearRect(0, 0, canvas.width, canvas.height);
       done = noticeImage.width > 1;
-      const offset = { x: (canvas.width - noticeImage.width) / 2, y: (canvas.height - noticeImage.height) / 2 };
+      const offset = {
+        x: (canvas.width - noticeImage.width) / 2,
+        y: (canvas.height - noticeImage.height) / 2
+      };
       context.drawImage(noticeImage, offset.x, offset.y);
       // context.scale(2, 2);
       texture.needsUpdate = true;
     }
   }, 1000);
-  const material = new THREE.SpriteMaterial({
-    map: texture,
-    useScreenCoordinates: false,
-    transparent: true
-  });
-  // new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, depthWrite: false });
+  const material =
+    // new THREE.MeshBasicMaterial({
+    //   map: texture,
+    //   useScreenCoordinates: false,
+    //   side: THREE.DoubleSide,
+    //   transparent: true
+    // });
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      depthWrite: false,
+      transparent: true
+    });
+
+  // material.color = new THREE.Color(0xff0000);
   // const canvas = document.createElement('canvas');
   // let context = canvas.getContext('2d');
 
@@ -147,8 +159,8 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
 
   // const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
   const geometry = new THREE.PlaneBufferGeometry(105, 105);
+  geometry.renderOrder = 1;
   // texture.needsUpdate = true;
-
 
   // const reso = 1000;
   // const step = (2 * Math.PI / reso);
@@ -177,7 +189,6 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
   // const shape = new THREE.Shape(trueShapeVertices);
   // const shapeGeo = shape.createGeometry(trueShapeVertices);
 
-
   class ShapeSVG extends ShapeParent {
     constructor(node) {
       super(node);
@@ -194,7 +205,7 @@ ShapesFactory.registerSVG = function (shapeName, svg, scale) {
   }
 };
 
-ShapesFactory.getShape = function (node) {
+ShapesFactory.getShape = function(node) {
   const shapeName = node.node_type;
   if (ShapesFactory.shapes[shapeName]) {
     return new ShapesFactory.shapes[shapeName](node);

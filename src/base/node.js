@@ -15,19 +15,17 @@
  *     limitations under the License.
  *
  */
-import {
-  assign, each, every, reduce, remove
-} from 'lodash';
+import { assign, each, every, reduce, remove } from "lodash";
 
-import GraphObject from './graphObject';
-import Notices from '../notices';
+import GraphObject from "./graphObject";
+import Notices from "../notices";
 
 const Console = console;
 
 class Node extends GraphObject {
-  constructor (node, renderer, entryNode) {
+  constructor(node, renderer, entryNode) {
     super();
-    this.type = 'node';
+    this.type = "node";
     this.update(node);
     this.minimumNoticeLevel = 0;
     this.entryNode = entryNode;
@@ -46,9 +44,12 @@ class Node extends GraphObject {
 
     this.invalidatedSinceLastViewUpdate = true;
 
-    this.options = Object.assign({
-      showLabel: true
-    }, node.options || {});
+    this.options = Object.assign(
+      {
+        showLabel: true
+      },
+      node.options || {}
+    );
 
     this.data = {
       volume: NaN,
@@ -57,46 +58,62 @@ class Node extends GraphObject {
     };
 
     this.metadata = node.metadata;
-    this.detailedMode = 'volume'; // 'volume' is default, can be a string that matches a data set in metadata: { details: {} }
+    this.detailedMode = "volume"; // 'volume' is default, can be a string that matches a data set in metadata: { details: {} }
   }
 
-  addIncomingConnection (connection) {
+  addIncomingConnection(connection) {
     this.incomingConnections.push(connection);
     this.invalidateIncomingVolume();
     this.connected = true;
   }
 
-  addOutgoingConnection (connection) {
+  addOutgoingConnection(connection) {
     this.outgoingConnections.push(connection);
     this.invalidateOutgoingVolume();
     this.connected = true;
   }
 
-  removeIncomingConnection (connection) {
-    remove(this.incomingConnections, incomingConnection => incomingConnection.name === connection.name);
+  removeIncomingConnection(connection) {
+    remove(
+      this.incomingConnections,
+      incomingConnection => incomingConnection.name === connection.name
+    );
     this.invalidateIncomingVolume();
-    if (this.incomingConnections.length === 0 && this.outgoingConnections.length === 0) {
+    if (
+      this.incomingConnections.length === 0 &&
+      this.outgoingConnections.length === 0
+    ) {
       this.connected = false;
     }
   }
 
-  removeOutgoingConnection (connection) {
-    remove(this.outgoingConnections, outgoingConnection => outgoingConnection.name === connection.name);
+  removeOutgoingConnection(connection) {
+    remove(
+      this.outgoingConnections,
+      outgoingConnection => outgoingConnection.name === connection.name
+    );
     this.invalidateOutgoingVolume();
-    if (this.incomingConnections.length === 0 && this.outgoingConnections.length === 0) {
+    if (
+      this.incomingConnections.length === 0 &&
+      this.outgoingConnections.length === 0
+    ) {
       this.connected = false;
     }
   }
 
-  invalidateIncomingVolume () {
+  invalidateIncomingVolume() {
     this.invalidatedSinceLastViewUpdate = true;
     this.incomingVolumeTotal = undefined;
     this.incomingVolume = {};
   }
 
-  validateIncomingVolume () {
-    this.incomingVolumeTotal = reduce(this.incomingConnections, (total, connection) => total + connection.getVolumeTotal(), 0);
-    each(this.incomingConnections, (c) => {
+  validateIncomingVolume() {
+    this.incomingVolumeTotal = reduce(
+      this.incomingConnections,
+      (total, connection) => total + connection.getVolumeTotal(),
+      0
+    );
+    each(this.incomingConnections, c => {
       each(c.volume, (value, key) => {
         this.incomingVolume[key] = this.incomingVolume[key] || 0;
         this.incomingVolume[key] += value;
@@ -104,25 +121,33 @@ class Node extends GraphObject {
     });
   }
 
-  getIncomingVolume (key) {
+  getIncomingVolume(key) {
     if (!key) {
-      if (!this.incomingVolumeTotal) { this.validateIncomingVolume(); }
+      if (!this.incomingVolumeTotal) {
+        this.validateIncomingVolume();
+      }
       return this.incomingVolumeTotal;
     }
 
-    if (!this.incomingVolume[key]) { this.validateIncomingVolume(); }
+    if (!this.incomingVolume[key]) {
+      this.validateIncomingVolume();
+    }
     return this.incomingVolume[key];
   }
 
-  invalidateOutgoingVolume () {
+  invalidateOutgoingVolume() {
     this.invalidatedSinceLastViewUpdate = true;
     this.outgoingVolumeTotal = undefined;
     this.outgoingVolume = {};
   }
 
-  validateOutgoingVolume () {
-    this.outgoingVolumeTotal = reduce(this.outgoingConnections, (total, connection) => total + connection.getVolumeTotal(), 0);
-    each(this.outgoingConnections, (c) => {
+  validateOutgoingVolume() {
+    this.outgoingVolumeTotal = reduce(
+      this.outgoingConnections,
+      (total, connection) => total + connection.getVolumeTotal(),
+      0
+    );
+    each(this.outgoingConnections, c => {
       each(c.volume, (value, key) => {
         this.outgoingVolume[key] = this.outgoingVolume[key] || 0;
         this.outgoingVolume[key] += value;
@@ -130,20 +155,26 @@ class Node extends GraphObject {
     });
   }
 
-  getOutgoingVolume (key) {
+  getOutgoingVolume(key) {
     if (!key) {
-      if (!this.outgoingVolumeTotal) { this.validateOutgoingVolume(); }
+      if (!this.outgoingVolumeTotal) {
+        this.validateOutgoingVolume();
+      }
       return this.outgoingVolumeTotal;
     }
 
-    if (!this.outgoingVolume[key]) { this.validateOutgoingVolume(); }
+    if (!this.outgoingVolume[key]) {
+      this.validateOutgoingVolume();
+    }
     return this.outgoingVolume[key];
   }
 
-  updatePosition (position, depth) {
+  updatePosition(position, depth) {
     if (position !== undefined) {
-      if ((position.x !== undefined && position.x !== this.position.x)
-        || (position.y !== undefined && position.y !== this.position.y)) {
+      if (
+        (position.x !== undefined && position.x !== this.position.x) ||
+        (position.y !== undefined && position.y !== this.position.y)
+      ) {
         this.position.x = position.x;
         this.position.y = position.y;
       }
@@ -154,7 +185,7 @@ class Node extends GraphObject {
     this.updateBoundingBox();
   }
 
-  updateBoundingBox () {
+  updateBoundingBox() {
     if (this.view) {
       this.boundingBox = {
         top: this.position.y - this.view.radius,
@@ -172,40 +203,54 @@ class Node extends GraphObject {
     }
   }
 
-  getClass () {
-    return this.class || 'normal';
+  getClass() {
+    return this.class || "normal";
   }
 
-  hasVisibleConnections () {
-    return !(every(this.incomingConnections, connection => !connection.isVisible())
-      && every(this.outgoingConnections, connection => !connection.isVisible()));
+  hasVisibleConnections() {
+    return !(
+      every(this.incomingConnections, connection => !connection.isVisible()) &&
+      every(this.outgoingConnections, connection => !connection.isVisible())
+    );
   }
 
-  hasDefaultVisibleConnections () {
-    return !(every(this.incomingConnections, connection => connection.defaultFiltered)
-      && every(this.outgoingConnections, connection => connection.defaultFiltered));
+  hasDefaultVisibleConnections() {
+    return !(
+      every(
+        this.incomingConnections,
+        connection => connection.defaultFiltered
+      ) &&
+      every(this.outgoingConnections, connection => connection.defaultFiltered)
+    );
   }
 
-  setContext (context) {
+  setContext(context) {
     super.setContext(context);
-    if (this.view) { this.view.updateText(); }
+    if (this.view) {
+      this.view.updateText();
+    }
   }
 
-  render () {
-    Console.warn('Attempted to render a Node base class. Extend the Node base class and provide a render() function that creates a view property.');
+  render() {
+    Console.warn(
+      "Attempted to render a Node base class. Extend the Node base class and provide a render() function that creates a view property."
+    );
   }
 
-  showNotices () {
-    if (this.view) { Notices.showNotices(this.view.container, this.notices); }
+  showNotices() {
+    if (this.view) {
+      Notices.showNotices(this.view.container, this.notices);
+    }
   }
 
-
-  updateData (totalVolume) {
+  updateData(totalVolume) {
     let updated = false;
 
     if (this.invalidatedSinceLastViewUpdate) {
       this.invalidatedSinceLastViewUpdate = false;
-      const serviceVolume = this.isEntryNode() ? totalVolume : this.getIncomingVolume();
+      const serviceVolume = this.isEntryNode()
+        ? totalVolume
+        : this.getIncomingVolume();
       const serviceVolumePercent = serviceVolume / totalVolume;
       if (this.data.volume !== serviceVolume) {
         this.data.volume = serviceVolume;
@@ -213,20 +258,25 @@ class Node extends GraphObject {
       }
       if (!serviceVolume) {
         this.data.volumePercent = 0;
-        each(this.data.classPercents, (v, k) => { this.data.classPercents[k] = 0; });
+        each(this.data.classPercents, (v, k) => {
+          this.data.classPercents[k] = 0;
+        });
       } else {
         if (this.data.volumePercent !== serviceVolumePercent) {
           this.data.volumePercent = serviceVolumePercent;
           updated = true;
         }
-        each(this.isEntryNode() ? this.outgoingVolume : this.incomingVolume, (volume, key) => {
-          const classVolumePercent = volume / serviceVolume;
-          this.data.classPercents[key] = this.data.classPercents[key] || 0;
-          if (this.data.classPercents[key] !== classVolumePercent) {
-            this.data.classPercents[key] = classVolumePercent;
-            updated = true;
+        each(
+          this.isEntryNode() ? this.outgoingVolume : this.incomingVolume,
+          (volume, key) => {
+            const classVolumePercent = volume / serviceVolume;
+            this.data.classPercents[key] = this.data.classPercents[key] || 0;
+            if (this.data.classPercents[key] !== classVolumePercent) {
+              this.data.classPercents[key] = classVolumePercent;
+              updated = true;
+            }
           }
-        });
+        );
       }
     }
 
@@ -242,18 +292,20 @@ class Node extends GraphObject {
     return updated;
   }
 
-  update (stateNode) {
+  update(stateNode) {
     this.classInvalidated = this.class !== stateNode.class;
     assign(this, stateNode);
     this.notices = stateNode.notices;
-    if (this.view) { this.view.refresh(false); }
+    if (this.view) {
+      this.view.refresh(false);
+    }
   }
 
-  updateVolume (volume) {
+  updateVolume(volume) {
     this.updated = this.updateData(volume);
   }
 
-  showLabel (showLabel) {
+  showLabel(showLabel) {
     if (this.options.showLabel !== showLabel) {
       this.options.showLabel = showLabel;
       if (this.view !== undefined) {
@@ -262,28 +314,43 @@ class Node extends GraphObject {
     }
   }
 
-  setModes (modes) {
+  setModes(modes) {
     this.detailedMode = modes.detailedNode;
-    if (this.view) { this.view.refresh(true); }
+    if (this.view) {
+      this.view.refresh(true);
+    }
   }
 
-  connectedTo (nodeName) {
-    if (super.connectionTo(nodeName)) { return true; }
+  connectedTo(nodeName) {
+    if (super.connectionTo(nodeName)) {
+      return true;
+    }
 
-    return !(every(this.incomingConnections, connection => connection.source.getName() !== nodeName)
-      && every(this.outgoingConnections, connection => connection.source.getName() !== nodeName));
+    return !(
+      every(
+        this.incomingConnections,
+        connection => connection.source.getName() !== nodeName
+      ) &&
+      every(
+        this.outgoingConnections,
+        connection => connection.source.getName() !== nodeName
+      )
+    );
   }
 
   // If entryNode is specified within graph we're checking if this node is entryNode
   // else we define entryNode based on amount of incoming and outgoing connections
-  isEntryNode () {
+  isEntryNode() {
     if (this.entryNode) {
       return this.name === this.entryNode;
     }
-    return this.incomingConnections.length === 0 && this.outgoingConnections.length > 0;
+    return (
+      this.incomingConnections.length === 0 &&
+      this.outgoingConnections.length > 0
+    );
   }
 
-  cleanup () {
+  cleanup() {
     if (this.view) {
       this.view.cleanup();
     }

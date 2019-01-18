@@ -15,12 +15,12 @@
  *     limitations under the License.
  *
  */
-import { merge, reduce } from "lodash";
-import chroma from "chroma-js";
+import { merge, reduce } from 'lodash';
+import chroma from 'chroma-js';
 
 const Console = console;
 
-function getRGBA(color) {
+function getRGBA (color) {
   const chromaColor = chroma(color);
   const rgb = chromaColor.rgb();
   return {
@@ -32,43 +32,43 @@ function getRGBA(color) {
 }
 
 class GlobalStyles {
-  constructor() {
+  constructor () {
     this.styles = {
-      colorText: "rgb(214, 214, 214)",
-      colorTextDisabled: "rgb(129, 129, 129)",
+      colorText: 'rgb(214, 214, 214)',
+      colorTextDisabled: 'rgb(129, 129, 129)',
       colorTraffic: {
-        normal: "rgb(186, 213, 237)",
-        normalDonut: "rgb(91, 91, 91)",
-        warning: "rgb(268, 185, 73)",
-        danger: "rgb(255, 53, 53)"
+        normal: 'rgb(186, 213, 237)',
+        normalDonut: 'rgb(91, 91, 91)',
+        warning: 'rgb(268, 185, 73)',
+        danger: 'rgb(255, 53, 53)'
       },
       colorNodeStatus: {
-        default: "rgb(120, 120, 120)",
-        normal: "rgb(127, 255, 0)",
-        warning: "rgb(268, 185, 73)",
-        danger: "rgb(255, 53, 53)"
+        default: 'rgb(120, 120, 120)',
+        normal: 'rgb(127, 255, 0)',
+        warning: 'rgb(268, 185, 73)',
+        danger: 'rgb(255, 53, 53)'
       },
-      colorNormalDimmed: "rgb(101, 117, 128)",
-      colorBackgroundDark: "rgb(35, 35, 35)",
-      colorLabelBorder: "rgb(16, 17, 18)",
-      colorLabelText: "rgb(0, 0, 0)",
-      colorDonutInternalColor: "rgb(35, 35, 35)",
-      colorDonutInternalColorHighlighted: "rgb(255, 255, 255)",
-      colorConnectionLine: "rgb(91, 91, 91)",
-      colorPageBackground: "rgb(45, 45, 45)",
-      colorPageBackgroundTransparent: "rgba(45, 45, 45, 0)",
-      colorBorderLines: "rgb(137, 137, 137)",
-      colorArcBackground: "rgb(60, 60, 60)"
+      colorNormalDimmed: 'rgb(101, 117, 128)',
+      colorBackgroundDark: 'rgb(35, 35, 35)',
+      colorLabelBorder: 'rgb(16, 17, 18)',
+      colorLabelText: 'rgb(0, 0, 0)',
+      colorDonutInternalColor: 'rgb(35, 35, 35)',
+      colorDonutInternalColorHighlighted: 'rgb(255, 255, 255)',
+      colorConnectionLine: 'rgb(91, 91, 91)',
+      colorPageBackground: 'rgb(45, 45, 45)',
+      colorPageBackgroundTransparent: 'rgba(45, 45, 45, 0)',
+      colorBorderLines: 'rgb(137, 137, 137)',
+      colorArcBackground: 'rgb(60, 60, 60)'
     };
 
     this.shapesStyles = {
-      colorShapeDefault: "rgb(120, 120, 120)"
+      colorShapeDefault: 'rgb(120, 120, 120)'
     };
 
     this.updateComputedStyles();
   }
 
-  getColorTraffic(key, highlighted) {
+  getColorTraffic (key, highlighted) {
     const color = !highlighted
       ? this.styles.colorTraffic[key]
       : this.styles.colorTrafficHighlighted[key];
@@ -83,7 +83,7 @@ class GlobalStyles {
     return color;
   }
 
-  getColorTrafficRGBA(key, highlighted) {
+  getColorTrafficRGBA (key, highlighted) {
     const color = highlighted
       ? this.rgba.colorTrafficHighlighted[key]
       : this.rgba.colorTraffic[key];
@@ -98,7 +98,7 @@ class GlobalStyles {
     return color;
   }
 
-  getColorSeverityRGBA(key) {
+  getColorSeverityRGBA (key) {
     return [
       this.rgba.colorTraffic.normal,
       this.rgba.colorTraffic.warning,
@@ -106,26 +106,26 @@ class GlobalStyles {
     ][key];
   }
 
-  getColorConnectionLine(connection) {
+  getColorConnectionLine (connection) {
     if (connection.colorConnectionLine) {
       return getRGBA(connection.colorConnectionLine);
     }
     return this.rgba.colorConnectionLine;
   }
 
-  updateStyles(styles) {
+  updateStyles (styles) {
     merge(this.styles, styles);
     this.updateComputedStyles(styles);
   }
 
-  updateComputedStyles(styles) {
+  updateComputedStyles (styles) {
     this.styles.colorTrafficHighlighted = reduce(
       this.styles.colorTraffic,
       (acc, value, key) => {
         if (
-          styles &&
-          styles.colorTrafficHighlighted &&
-          styles.colorTrafficHighlighted[key]
+          styles
+          && styles.colorTrafficHighlighted
+          && styles.colorTrafficHighlighted[key]
         ) {
           acc[key] = styles.colorTrafficHighlighted[key];
         } else {

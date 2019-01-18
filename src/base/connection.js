@@ -15,18 +15,16 @@
  *     limitations under the License.
  *
  */
-import {
-  clone, sortBy, sum, isEmpty, values, reduce
-} from 'lodash';
-import GraphObject from './graphObject';
-import Notices from '../notices';
+import { clone, sortBy, sum, isEmpty, values, reduce } from "lodash";
+import GraphObject from "./graphObject";
+import Notices from "../notices";
 
 const Console = console;
 
 class Connection extends GraphObject {
-  constructor (options) {
+  constructor(options) {
     super();
-    this.type = 'connection';
+    this.type = "connection";
     this.source = options.source;
     this.target = options.target;
 
@@ -39,44 +37,57 @@ class Connection extends GraphObject {
     this.loaded = true;
   }
 
-  getName () {
+  getName() {
     return this.name;
   }
 
-  getVolume (key) {
+  getVolume(key) {
     return this.volume[key];
   }
 
-  getVolumePercent (key) {
+  getVolumePercent(key) {
     return this.volumePercent[key];
   }
 
-  getVolumeTotal () {
+  getVolumeTotal() {
     return this.volumeTotal;
   }
 
-  update (data) {
+  update(data) {
     this.metadata = data.metadata || this.metadata;
     this.annotations = data.annotations || this.annotations;
-
-    this.class = data.class || 'normal';
+    this.colorConnectionLine = data.colorConnectionLine;
+    this.class = data.class || "normal";
     this.volume = data.metrics ? clone(data.metrics) : {};
     if (isEmpty(this.volume)) {
       // Add info notice to the connection with missing metrics
       this.notices = this.notices || [];
-      this.notices.push({ title: 'Connection found, but no metrics.', severity: 0 });
+      this.notices.push({
+        title: "Connection found, but no metrics.",
+        severity: 0
+      });
     }
     this.volumeTotal = sum(values(this.volume));
     this.notices = data.notices || undefined;
 
     // Store percentages on the object to not have to calculate it when
     // launching new particles in the view
-    this.volumePercent = reduce(this.volume, (acc, value, key) => {
-      acc[key] = (this.volumeTotal && this.volumeTotal > 0) ? (value / this.volumeTotal) : 0;
-      return acc;
-    }, {});
+    this.volumePercent = reduce(
+      this.volume,
+      (acc, value, key) => {
+        acc[key] =
+          this.volumeTotal && this.volumeTotal > 0
+            ? value / this.volumeTotal
+            : 0;
+        return acc;
+      },
+      {}
+    );
 
-    this.volumePercentKeysSorted = sortBy(Object.keys(this.volumePercent), key => this.volumePercent[key]);
+    this.volumePercentKeysSorted = sortBy(
+      Object.keys(this.volumePercent),
+      key => this.volumePercent[key]
+    );
 
     // Invalidate the volumes on the nodes themselves
     this.source.invalidateOutgoingVolume();
@@ -87,26 +98,32 @@ class Connection extends GraphObject {
     }
   }
 
-  updateGreatestVolume (greatestVolume) {
+  updateGreatestVolume(greatestVolume) {
     this.volumeGreatest = greatestVolume;
     if (this.view) {
       this.view.updateVolume();
     }
   }
 
-  render () {
-    Console.warn('Attempted to render a Connection base class. Extend the Connection class and provide a render() function.');
+  render() {
+    Console.warn(
+      "Attempted to render a Connection base class. Extend the Connection class and provide a render() function."
+    );
   }
 
-  showNotices () {
-    if (this.view && this.view.noticeView) { Notices.showNotices(this.view.noticeView.container, this.notices); }
+  showNotices() {
+    if (this.view && this.view.noticeView) {
+      Notices.showNotices(this.view.noticeView.container, this.notices);
+    }
   }
 
-  connectedTo (nodeName) {
-    return this.source.getName() === nodeName || this.target.getName() === nodeName;
+  connectedTo(nodeName) {
+    return (
+      this.source.getName() === nodeName || this.target.getName() === nodeName
+    );
   }
 
-  isInteractive () {
+  isInteractive() {
     return this.view !== undefined;
   }
 }
